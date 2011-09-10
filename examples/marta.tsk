@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<transketch>
+  <points>
+    <point id="2" x="0.0" y="4.0" />
+    <point id="3" x="1.0" y="6.0" />
+    <point id="4" x="5.0" y="10.0" />
+    <point id="5" x="2.0" y="14.0" />
+    <point id="6" x="1.0" y="-1.0" />
+    <point id="7" x="3.0" y="0.0" />
+    <point id="8" x="9.0" y="2.0" />
+    <point id="9" x="-1.0" y="0.0" />
+    <point id="10" x="-3.0" y="-8.0" />
+    <point id="11" x="-4.0" y="1.0" />
+    <point id="12" x="-7.0" y="3.0" />
+    <point id="13" x="-9.0" y="1.0" />
+  </points>
+  <corridors>
+    <corridor id="1" fpoint="2" tpoint="9" theta="2.356194490192345" />
+    <corridor id="2" fpoint="2" tpoint="3" theta="2.356194490192345" />
+    <corridor id="3" fpoint="3" tpoint="4" theta="2.356194490192345" />
+    <corridor id="4" fpoint="5" tpoint="3" theta="2.356194490192345" />
+    <corridor id="5" fpoint="6" tpoint="9" theta="2.356194490192345" />
+    <corridor id="6" fpoint="6" tpoint="7" theta="2.356194490192345" />
+    <corridor id="7" fpoint="8" tpoint="7" theta="2.356194490192345" />
+    <corridor id="8" fpoint="10" tpoint="9" theta="2.356194490192345" />
+    <corridor id="9" fpoint="11" tpoint="9" theta="2.356194490192345" />
+    <corridor id="10" fpoint="11" tpoint="12" theta="2.356194490192345" />
+    <corridor id="11" fpoint="11" tpoint="13" theta="2.356194490192345" />
+  </corridors>
+  <lines>
+    <line id="1" name="Red" corridors="4,2,1,8" bundled="true" layerindex="0.0">
+      <style id="1">
+        <colorkey key="color" color="-3394816" />
+      </style>
+    </line>
+    <line id="2" name="Gold" corridors="8,1,2,3" bundled="true" layerindex="0.0">
+      <style id="1">
+        <colorkey key="color" color="-3342592" />
+      </style>
+    </line>
+    <line id="3" name="Green" corridors="6,5,9,10" bundled="true" layerindex="0.0">
+      <style id="1">
+        <colorkey key="color" color="-13395712" />
+      </style>
+    </line>
+    <line id="4" name="Blue" corridors="7,6,5,9,11" bundled="true" layerindex="0.0">
+      <style id="1">
+        <colorkey key="color" color="-16763956" />
+      </style>
+    </line>
+  </lines>
+  <stops>
+    <stop id="1" name="Five Points">
+      <property name="labelangle" value="3.141592653589793" />
+      <type name="ANCHORBASED">
+         <property name="anchor" value="9" />
+      </type>
+    </stop>
+    <stop id="2" name="Airport">
+      <type name="ANCHORBASED">
+         <property name="anchor" value="10" />
+      </type>
+      <style id="1"></style>
+    </stop>
+    <stop id="3" name="Indian Creek">
+      <type name="ANCHORBASED">
+         <property name="anchor" value="8" />
+      </type>
+    </stop>
+    <stop id="4" name="HE Holmes">
+      <property name="labelangle" value="3.141592653589793" />
+      <type name="ANCHORBASED">
+         <property name="anchor" value="13" />
+      </type>
+    </stop>
+    <stop id="5" name="King Memorial">
+      <type name="ANCHORBASED">
+         <property name="anchor" value="7" />
+      </type>
+      <style id="1"></style>
+    </stop>
+    <stop id="6" name="Bankhead">
+      <property name="labelangle" value="3.141592653589793" />
+      <type name="ANCHORBASED">
+         <property name="anchor" value="12" />
+      </type>
+    </stop>
+    <stop id="7" name="Lindbergh">
+      <type name="ANCHORBASED">
+         <property name="anchor" value="3" />
+      </type>
+      <style id="1"></style>
+    </stop>
+    <stop id="8" name="Doraville">
+      <type name="ANCHORBASED">
+         <property name="anchor" value="4" />
+      </type>
+    </stop>
+    <stop id="9" name="North Springs">
+      <type name="ANCHORBASED">
+         <property name="anchor" value="5" />
+      </type>
+    </stop>
+  </stops>
+  <linestyles>
+    <style id="1" name="MARTA Rail">
+      <substyles breakpoints="">
+        <substyle envelope="12">
+          <layer color="$color" width="10" dash="" />
+        </substyle>
+      </substyles>
+    </style>
+  </linestyles>
+  <stopstyles>
+    <style id="1" name="Rounded" renderertype="ROUNDED" templatetype="FILLEDBORDEREDSHAPE" >
+      <colorprop key="fcolor" name="Fill Color" value="-1" />
+      <intprop key="bweight" name="Border Weight" value="2" />
+      <colorprop key="bcolor" name="Border Color" value="-16777216" />
+    </style>
+  </stopstyles>
+</transketch>

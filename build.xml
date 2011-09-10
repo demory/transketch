@@ -1,0 +1,65 @@
+<project name="Transit Sketchpad" basedir="." default="main">
+    <description>
+        Build file for the Transit Sketchpad project (https://github.com/demory/transketch)
+    </description>
+
+  <!-- global properties -->
+  <property name="src.dir"         value="src/main/java/" />
+  <property name="resources.dir"   value="src/main/resources/" />
+  <property name="build.dir"       value="build" />
+  <property name="dist.dir"        value="dist" />
+  <property name="lib.dir"         value="lib" />
+  <property name="conf.dir"        value="conf" />
+
+  <property name="main-class"  value="org.transketch.apps.desktop.TranSketch"/>
+
+
+  <path id="classpath">
+    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+  </path>
+
+
+  <target name="clean">
+    <delete dir="${build.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
+
+  <target name="init">
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build.dir}" />
+    <mkdir dir="${conf.dir}" />
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <!-- Compile the java code from ${src.dir} into ${build.dir} -->
+    <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" />
+  </target>
+
+  <target name="jar" depends="compile"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist.dir}"/>
+
+    <!-- Put everything in ${build} into the transketch.jar file -->
+    <jar jarfile="${dist.dir}/transketch.jar" basedir="${build.dir}">
+      <fileset dir="${resources.dir}"/>
+      <manifest>
+         <attribute name="Main-Class" value="${main-class}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="run" depends="jar">
+     <java fork="true" classname="${main-class}">
+        <classpath>
+          <path refid="classpath"/>
+          <path location="${dist.dir}/transketch.jar"/>
+        </classpath>
+     </java> 
+  </target>
+
+  <target name="main" depends="clean,jar"/>
+
+</project>
+
