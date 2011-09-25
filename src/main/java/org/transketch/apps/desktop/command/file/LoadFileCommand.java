@@ -56,12 +56,14 @@ public class LoadFileCommand extends EditorBasedCommand {
   public boolean doThis(TranSketch ts) {
     
     if(file_ == null) {
-      JFileChooser chooser = new JFileChooser();
+      JFileChooser chooser = new JFileChooser(ts.getWorkingDirectory());//new File(System.getProperty("user.dir")));
       FileNameExtensionFilter filter = new FileNameExtensionFilter("Transit Sketchpad Files", "tsk");
       chooser.setFileFilter(filter);
       int returnVal = chooser.showOpenDialog(ts.getGUI());
-      if (returnVal == JFileChooser.APPROVE_OPTION)
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
         file_ = chooser.getSelectedFile();
+        ts.setWorkingDirectory(new File(file_.getAbsolutePath()));
+      }
       else return false;
     }
 

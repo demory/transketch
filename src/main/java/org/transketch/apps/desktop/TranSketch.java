@@ -24,6 +24,7 @@
 
 package org.transketch.apps.desktop;
 
+import java.io.File;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.command.TSCommand;
@@ -47,6 +48,7 @@ public class TranSketch extends Application implements TSInvoker {
   private CommandFactory cmdFactory_;
 
   private RecentFiles recentFiles_;
+  private File workingDirectory_ = new File(System.getProperty("user.dir"));
 
   public TranSketch() {
     super("transketch", false);
@@ -66,6 +68,14 @@ public class TranSketch extends Application implements TSInvoker {
 
   public RecentFiles getRecentFiles() {
     return recentFiles_;
+  }
+
+  public File getWorkingDirectory() {
+    return workingDirectory_;
+  }
+
+  public void setWorkingDirectory(File workingDir) {
+    workingDirectory_ = workingDir;
   }
 
   @Override
