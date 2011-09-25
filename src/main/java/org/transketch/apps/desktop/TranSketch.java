@@ -38,7 +38,7 @@ import org.transketch.apps.desktop.gui.TranSketchGUI;
  */
 public class TranSketch extends Application implements TSInvoker {
 
-  public final static double VERSION = 0.1;
+  public final static String VERSION = "0.0";
 
   // the graphical interface:
   private TranSketchGUI gui_;
