@@ -30,12 +30,14 @@ import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.JComboBox;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author demory
  */
 public class SmartComboBox extends JComboBox {
+  private final static Logger logger = Logger.getLogger(SmartComboBox.class);
 
   Container parent;
 
@@ -64,10 +66,10 @@ public class SmartComboBox extends JComboBox {
       if(c != this) pw -= c.getSize().width;
     }
 
-    System.out.println("parent resized to "+pw);
+    logger.debug("parent resized to "+pw);
     setMaximumSize(new Dimension(pw, getHeight()));
     setSize(new Dimension(pw, getHeight()));
-    System.out.println("setSize");
+    logger.debug("setSize");
   }
 
 }

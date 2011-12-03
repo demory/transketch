@@ -28,8 +28,7 @@ import java.awt.Color;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
 import org.transketch.core.network.TSNetwork;
@@ -44,6 +43,7 @@ import org.transketch.util.viewport.MapCoordinates;
  * @author demory
  */
 public abstract class Stop implements Drawable {
+  private final static Logger logger = Logger.getLogger(Stop.class);
 
   // core fields (i.e. stored in the .fpc file)
 
@@ -180,14 +180,13 @@ public abstract class Stop implements Drawable {
   public void updateRenderer() {
 
     try {
-      //System.out.println("type="+stopStyle_.getRendererType());
-      //System.out.println("style template="+stopStyle_.getTemplate());
+      //logger.debug("type="+stopStyle_.getRendererType());
+      //logger.debug("style template="+stopStyle_.getTemplate());
       Class cl = stopStyle_.getRendererType().classObj_;
       Constructor co = cl.getConstructor(new Class[] {Stop.class, stopStyle_.getRendererType().templateClassObj_ } );
       renderer_ = (StopRenderer) co.newInstance(new Object[] { this, stopStyle_.getTemplate() } );
     } catch (Exception ex) {
-      ex.printStackTrace();
-      Logger.getLogger(Stop.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error updating stop renderer", ex);
     }
   }
 

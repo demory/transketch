@@ -24,38 +24,31 @@
 
 package org.transketch.core.network;
 
-import org.transketch.core.network.corridor.Corridor;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
+import java.util.*;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
-import org.transketch.util.viewport.MapCoordinates;
-import org.transketch.apps.desktop.gui.editor.map.EditorCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
+import org.transketch.apps.desktop.gui.editor.map.EditorCanvas;
 import org.transketch.core.NamedItem;
+import org.transketch.core.network.corridor.Corridor;
 import org.transketch.core.network.corridor.CorridorComponent;
 import org.transketch.util.FPUtil;
+import org.transketch.util.viewport.MapCoordinates;
 
 /**
  *
  * @author demory
  */
 public class Line implements Drawable, NamedItem {
+  private final static Logger logger = Logger.getLogger(Line.class);
 
   private int id_;
   private double layerIndex_ = 0;
@@ -377,7 +370,7 @@ public class Line implements Drawable, NamedItem {
   }
 
   public void splitCorridor(Corridor old, Corridor new1, Corridor new2) {
-    System.out.println("splitCorridor "+name_+" at "+old.toString());
+    logger.debug("splitCorridor "+name_+" at "+old.toString());
     List<Corridor> newList = new ArrayList<Corridor>();
 
     // special case: we are splitting the one corridor in this line
@@ -423,12 +416,12 @@ public class Line implements Drawable, NamedItem {
   }
 
   public void unsplitCorridor(Corridor old, Corridor new1, Corridor new2) {
-    System.out.println("splitCorridor "+name_+" at "+old.toString());
+    logger.debug("splitCorridor "+name_+" at "+old.toString());
     List<Corridor> newList = new ArrayList<Corridor>();
 
     String str = "usC before:";
     for(Corridor c : corridors_) str+=" " + c.getID();
-    System.out.println(str);
+    logger.debug(str);
 
     for(int i = 0; i < corridors_.size()-1; i++) {
       if((corridors_.get(i) == new1 && corridors_.get(i+1) == new2) ||
@@ -445,7 +438,7 @@ public class Line implements Drawable, NamedItem {
 
     str = "usC after:";
     for(Corridor c : corridors_) str+=" " + c.getID();
-    System.out.println(str);
+    logger.debug(str);
     
     corridors_ = newList;
     CorridorInfo newCI1 = corridorInfo_.get(new1.getID());
@@ -494,7 +487,7 @@ public class Line implements Drawable, NamedItem {
   }
 
   public void draw(Graphics2D g2d, MapCoordinates coords) {
-    //System.out.println("draw line "+name_);
+    //logger.debug("draw line "+name_);
     AnchorPoint a = startPoint();
     
     /*if(highlighted_) {
@@ -538,7 +531,7 @@ public class Line implements Drawable, NamedItem {
     double mx = c.getCoordinates().xToScreen(wx);
     double my = c.getCoordinates().yToScreen(wy);
     double tol = style_.getActiveSubStyle().getMaxLayerWidth()/2;
-    //System.out.println("MPt = "+mx+","+my);
+    //logger.debug("MPt = "+mx+","+my);
 
     PathIterator pi = path.getPathIterator(null, 1);
     double pts[] = new double[6];
@@ -546,7 +539,7 @@ public class Line implements Drawable, NamedItem {
     while(!pi.isDone()) {
 
       pi.currentSegment(pts);
-      //System.out.println("pt = "+pts[0]+","+pts[1]);
+      //logger.debug("pt = "+pts[0]+","+pts[1]);
 
       if(pt1 == null) {
 
@@ -555,7 +548,7 @@ public class Line implements Drawable, NamedItem {
       else {
         pt2 = new Point2D.Double(pts[0], pts[1]);
         double dist = FPUtil.distToSegment(mx, my, pt1.getX(), pt1.getY(), pt2.getX(), pt2.getY());
-        //if(dist< 100) System.out.println("  dist = "+dist);
+        //if(dist< 100) logger.debug("  dist = "+dist);
         if(dist < tol) return true;
         pt1 = pt2;
       }
@@ -628,7 +621,7 @@ public class Line implements Drawable, NamedItem {
       toPt = c.opposite(fromPt);
       int offsetFrom = ci.offsetFrom_ + additionalOffset;
       int offsetTo = ci.offsetTo_ + additionalOffset;
-      //System.out.println(" c="+c.getID()+" "+offsetFrom+","+offsetTo);
+      //logger.debug(" c="+c.getID()+" "+offsetFrom+","+offsetTo);
       Line2D prevLine = null;
       if(i-1 >= 0) {
         Corridor prevCorr = corridors_.get(i-1);

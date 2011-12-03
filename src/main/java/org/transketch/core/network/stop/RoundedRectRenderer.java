@@ -30,6 +30,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.core.network.Bundler.Bundle;
 
@@ -38,6 +39,7 @@ import org.transketch.core.network.Bundler.Bundle;
  * @author demory
  */
 public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendererTemplate> {
+  private final static Logger logger = Logger.getLogger(RoundedRectRenderer.class);
 
   private double radius_ = 3, width_, height_, rotR_;
 
@@ -52,7 +54,7 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
     AnchorBasedStop abStop = (AnchorBasedStop) stop_;
     List<Integer> axes = new ArrayList<Integer>(abStop.getAnchorPoint().getBundleAxes());
 
-    //System.out.println("axes size="+axes.size());
+    //logger.debug("axes size="+axes.size());
 
     if(axes.size() == 1) {
       Bundle b1 = abStop.getAnchorPoint().getBundles().get(axes.get(0));
@@ -99,7 +101,7 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
   public Point2D getLabelOrigin(TSCanvas c) {
     double r2 = width_/2 + 5; // default buffer
 
-    //System.out.println("s.gLA" +stop_.getLabelAngle());
+    //logger.debug("s.gLA" +stop_.getLabelAngle());
     int sign = stop_.getLabelAngle() < Math.PI/2 || stop_.getLabelAngle() > 3*Math.PI/2 ? -1 : 1;
 
     return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+sign*r2*Math.cos(rotR_),

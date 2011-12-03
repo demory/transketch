@@ -29,6 +29,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellRenderer;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.gui.TranSketchGUI;
 import org.transketch.core.NamedItem;
@@ -39,6 +40,7 @@ import org.transketch.util.gui.GUIFactory;
  * @author demory
  */
 public abstract class ListControlFrame<I extends NamedItem> extends ControlFrame {
+  private final static Logger logger = Logger.getLogger(ListControlFrame.class);
 
   protected JPanel listPanel_;
 
@@ -106,7 +108,7 @@ public abstract class ListControlFrame<I extends NamedItem> extends ControlFrame
 
     listPanel_.revalidate();
     if(scrollToSelected && n > 0) {
-      //System.out.println("range="+scrollPane_.getVerticalScrollBar().getMinimum()+" to "+scrollPane_.getVerticalScrollBar().getMaximum());
+      //logger.debug("range="+scrollPane_.getVerticalScrollBar().getMinimum()+" to "+scrollPane_.getVerticalScrollBar().getMaximum());
       listPanel_.scrollRectToVisible(new Rectangle(0, n, selectedRow_.getWidth(), selectedRow_.getHeight()));
       final int val = scrollTo;
       SwingUtilities.invokeLater(new Runnable() {
@@ -165,12 +167,6 @@ public abstract class ListControlFrame<I extends NamedItem> extends ControlFrame
   public void itemSelectedExternally(I item, boolean scrollTo) {
     ItemRow row = rows_.get(item);
     selectedRow_ = row;
-    /*if(scrollTo) {
-      System.out.println("scrolling");
-      rows_.
-      scrollPane_.scrollRectToVisible(row.getBounds());
-      //scrollPane_.
-    }*/
     for(Component comp : selectionDependent_) comp.setEnabled(true);
     refreshList(scrollTo);
   }

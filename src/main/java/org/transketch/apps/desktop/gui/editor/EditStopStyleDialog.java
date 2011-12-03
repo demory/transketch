@@ -29,8 +29,6 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Constructor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -42,6 +40,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import org.apache.log4j.Logger;
 import org.transketch.core.network.stop.RendererProperty;
 import org.transketch.core.network.stop.Stop;
 import org.transketch.core.network.stop.StopRenderer;
@@ -54,6 +53,7 @@ import org.transketch.util.gui.GUIFactory;
  * @author demory
  */
 public class EditStopStyleDialog extends JDialog implements ActionListener {
+  private final static Logger logger = Logger.getLogger(EditStopStyleDialog.class);
 
   private StopStyle style_;
 
@@ -73,13 +73,12 @@ public class EditStopStyleDialog extends JDialog implements ActionListener {
     
     // init renderer
     try {
-      //System.out.println("class="+stopStyle_.getRendererType().className_);
+      //logger.debug("class="+stopStyle_.getRendererType().className_);
       Class cl = style_.getRendererType().getRendererClass();
       Constructor co = cl.getConstructor(new Class[] {Stop.class, style.getRendererType().getTemplateClass() } );
       renderer_ = (StopRenderer) co.newInstance(new Object[] { null, style_.getTemplate().clone() } );
     } catch (Exception ex) {
-      ex.printStackTrace();
-      Logger.getLogger(Stop.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error initializing renderer", ex);
     }
 
     JPanel previewPanel = new JPanel();
@@ -179,20 +178,19 @@ public class EditStopStyleDialog extends JDialog implements ActionListener {
 
   private void rendererTypeSelected() {
     propsList_.removeAll();
-    //System.out.println("selected: "+rendererCB_.getSelectedItem());
+    //logger.debug("selected: "+rendererCB_.getSelectedItem());
     
     StopRenderer.Type type = (StopRenderer.Type) rendererCB_.getSelectedItem();
 
     StopRenderer renderer = null;
 
     try {
-      //System.out.println("class="+stopStyle_.getRendererType().className_);
+      //logger.debug("class="+stopStyle_.getRendererType().className_);
       Class cl = type.getRendererClass();
       Constructor co = cl.getConstructor(new Class[] {Stop.class, type.getTemplateClass() } );
       renderer_ = (StopRenderer) co.newInstance(new Object[] { null, type.getTemplateClass().newInstance() } );
     } catch (Exception ex) {
-      ex.printStackTrace();
-      Logger.getLogger(Stop.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error initializing renderer", ex);
     }
 
     showRendererProperties();

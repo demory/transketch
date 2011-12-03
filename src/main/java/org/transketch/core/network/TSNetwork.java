@@ -40,8 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSDocument;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.util.FPUtil;
@@ -55,6 +54,7 @@ import org.w3c.dom.NodeList;
  * @author demory
  */
 public class TSNetwork {
+  private final static Logger logger = Logger.getLogger(TSNetwork.class);
 
   private TSDocument doc_;
 
@@ -218,7 +218,7 @@ public class TSNetwork {
     double corrST = corr.getStraightTheta();
     for(Corridor c : incidentCorridors(pt)) {
       if(c.sharesEndpointsWith(corr)) continue;
-      //System.out.println(c.getStraightTheta() + " vs "+corr.getStraightTheta());
+      //logger.debug(c.getStraightTheta() + " vs "+corr.getStraightTheta());
       if(c.isStraight() && Math.abs(c.getStraightTheta() - corrST) < tol) //c.isVertical() && corr.isVertical() || c.isHorizontal() && corr.isHorizontal())
         return c;
     }
@@ -251,25 +251,25 @@ public class TSNetwork {
   }
 
   public List<Corridor> findPathToLine(Corridor corr, Line line, int maxSteps) {
-    //System.out.println("fPTL: corr "+corr.getID()+" to "+line.startPoint().getID()+"/"+line.endPoint().getID());
+    //logger.debug("fPTL: corr "+corr.getID()+" to "+line.startPoint().getID()+"/"+line.endPoint().getID());
     Collection<Corridor> dnt = new HashSet<Corridor>(line.getCorridors()); //Collections.singleton(corr);
     dnt.add(corr);
     List<Corridor> shortest = null;
 
     List<Corridor> fs = findPathBetweenPoints(corr.fPoint(), line.startPoint(), dnt, maxSteps, " fs> ");
-    //System.out.println(" fs: "+(fs == null ? "none" : "len="+fs.size()));
+    //logger.debug(" fs: "+(fs == null ? "none" : "len="+fs.size()));
     if(fs != null && (shortest == null || fs.size() < shortest.size())) shortest = fs;
 
     List<Corridor> fe = findPathBetweenPoints(corr.fPoint(), line.endPoint(), dnt, maxSteps, " fe> ");
-    //System.out.println(" fe: "+(fe == null ? "none" : "len="+fe.size()));
+    //logger.debug(" fe: "+(fe == null ? "none" : "len="+fe.size()));
     if(fe != null && (shortest == null || fe.size() < shortest.size())) shortest = fe;
 
     List<Corridor> ts = findPathBetweenPoints(corr.tPoint(), line.startPoint(), dnt, maxSteps, " ts> ");
-    //System.out.println(" ts: "+(ts == null ? "none" : "len="+ts.size()));
+    //logger.debug(" ts: "+(ts == null ? "none" : "len="+ts.size()));
     if(ts != null && (shortest == null || ts.size() < shortest.size())) shortest = ts;
 
     List<Corridor> te = findPathBetweenPoints(corr.tPoint(), line.endPoint(), dnt, maxSteps, " te> ");
-    //System.out.println(" te: "+(te == null ? "none" : "len="+te.size()));
+    //logger.debug(" te: "+(te == null ? "none" : "len="+te.size()));
     if(te != null && (shortest == null || te.size() < shortest.size())) shortest = te;
 
     return shortest;
@@ -341,7 +341,7 @@ public class TSNetwork {
 
   public void addStop(Stop stop) {
     stops_.put(stop.getID(), stop);
-    //System.out.println("# stops = "+stops_.size());
+    //logger.debug("# stops = "+stops_.size());
   }
 
   public void deleteStop(Stop stop) {
@@ -407,7 +407,7 @@ public class TSNetwork {
             Node lineNode = lineNodes.item(il);
             NamedNodeMap attributes = lineNode.getAttributes();
             int id = new Integer(attributes.getNamedItem("id").getNodeValue()).intValue();
-            //System.out.println("loading line "+id);
+            //logger.debug("loading line "+id);
             if(id > maxID) maxID = id;
             String name = attributes.getNamedItem("name").getNodeValue();
 
@@ -429,7 +429,7 @@ public class TSNetwork {
               for(String corrID : corrIDs) {
                 Corridor corr = corridors_.get(new Integer(corrID));
                 line.initCorridor(corr);
-                //System.out.println(" added corr "+corrID);
+                //logger.debug(" added corr "+corrID);
               }
             }
 
@@ -557,7 +557,7 @@ public class TSNetwork {
             // create the stop
             Stop stop = null;
             try {
-              //System.out.println("typeName="+typeName);
+              //logger.debug("typeName="+typeName);
               Class cl = Class.forName(Stop.Type.valueOf(typeName).className_);
               Constructor co = cl.getConstructor(new Class[] {Integer.class, String.class} );
               stop = (Stop) co.newInstance(new Object[] {stopID, stopName} );
@@ -566,8 +566,7 @@ public class TSNetwork {
               if(stopStyleID > 0) stop.setStyle(doc_.getStopStyles().getStyle(stopStyleID));
               addStop(stop);
             } catch (Exception ex) {
-              ex.printStackTrace();
-              Logger.getLogger(Stop.class.getName()).log(Level.SEVERE, null, ex);
+              logger.error("error creating stop", ex);
             }
 
           }
@@ -577,9 +576,6 @@ public class TSNetwork {
       } // end of stop processing block
 
     }
-    /*} catch(Exception e) {
-      e.printStackTrace();
-    }*/
   }
   
   public String getXML(String indent) {

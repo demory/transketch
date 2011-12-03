@@ -28,12 +28,14 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author demory
  */
 public abstract class StopRendererTemplate implements Cloneable {
+  private final static Logger logger = Logger.getLogger(StopRendererTemplate.class);
 
   protected Set<RendererProperty> props_ = new HashSet<RendererProperty>();
 
@@ -64,7 +66,7 @@ public abstract class StopRendererTemplate implements Cloneable {
 
   public void print() {
     for(RendererProperty prop : props_) {
-      System.out.println("- "+prop.getName()+"="+prop.getValue()+" obj="+prop);
+      logger.debug("- "+prop.getName()+"="+prop.getValue()+" obj="+prop);
     }
   }
 }

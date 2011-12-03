@@ -27,6 +27,7 @@ package org.transketch.apps.desktop.command.network;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
@@ -40,6 +41,7 @@ import org.transketch.core.network.Line;
  * @author demory
  */
 public class SplitCorridorCommand extends EditorBasedCommand implements TSAction {
+  private final static Logger logger = Logger.getLogger(SplitCorridorCommand.class);
 
   private Corridor initialCorr_, splitCorr1_, splitCorr2_;
   private AnchorPoint point_;
@@ -51,7 +53,7 @@ public class SplitCorridorCommand extends EditorBasedCommand implements TSAction
 
   public SplitCorridorCommand(Editor ed, Corridor corr, double x, double y) {
     super(ed);
-    System.out.println("init split "+x+","+y);
+    logger.debug("init split "+x+","+y);
     initialCorr_ = corr;
     x_ = x; y_ = y;
   }
@@ -61,7 +63,7 @@ public class SplitCorridorCommand extends EditorBasedCommand implements TSAction
     boolean result = true;
     if(anchorPointCmd_ == null) {
       Point2D pt = initialCorr_.nearestPoint(x_, y_);
-      System.out.println(pt);
+      logger.debug(pt);
       anchorPointCmd_ = new CreateAnchorPointCommand(ed_, pt.getX(), pt.getY());
       // TODO: snap to grid
     }

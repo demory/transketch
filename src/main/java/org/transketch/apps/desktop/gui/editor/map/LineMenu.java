@@ -82,11 +82,9 @@ public class LineMenu extends MapContextMenu {
     isBundledItem_.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if(isBundledItem_.isSelected()) {
-          System.out.println("checked!");
           line_.setBundled(true);
         }
         else {
-          System.out.println("unchecked!");
           line_.setBundled(false);
         }
       }

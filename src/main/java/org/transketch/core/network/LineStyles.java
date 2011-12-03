@@ -86,7 +86,6 @@ public class LineStyles {
             if(id > maxID) maxID = id;
             String name = attributes.getNamedItem("name").getNodeValue();
 
-            System.out.println("found style id="+id);
             LineStyle style = new LineStyle(id, name);
 
             NodeList styleChildNodes = stylesNodes.item(is).getChildNodes();

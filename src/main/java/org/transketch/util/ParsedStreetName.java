@@ -56,7 +56,6 @@ public class ParsedStreetName {
   }
 
   public boolean compareTo(ParsedStreetName ssn) {
-    //System.out.println("comparing "+getFullName()+" to "+ssn.getFullName());
     boolean nameOK = (this.getName().equals(ssn.getName()));
     boolean quadOK = (this.getQuadrant() == 0 || this.getQuadrant() == ssn.getQuadrant());
     boolean dirOK = (this.getDirPrefix().length() == 0 || this.getDirPrefix().equals(ssn.getDirPrefix()));

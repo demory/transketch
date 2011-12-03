@@ -36,6 +36,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.CommandFactory;
@@ -48,6 +49,7 @@ import org.transketch.apps.desktop.gui.control.ControlFrame;
  * @author demory
  */
 public class MenuBar extends JMenuBar {
+  private final static Logger logger = Logger.getLogger(MenuBar.class);
 
   private TSInvoker invoker_;
 
@@ -111,7 +113,7 @@ public class MenuBar extends JMenuBar {
       item.addItemListener(new ItemListener() {
         public void itemStateChanged(ItemEvent e) {
           frame.setVisible(item.isSelected());
-          //System.out.println("iSC "+item.isSelected());
+          //logger.debug("iSC "+item.isSelected());
         }
       });
       windowMenu.add(item);
@@ -154,7 +156,7 @@ public class MenuBar extends JMenuBar {
         public void actionPerformed(ActionEvent e) {
           LoadFileCommand cmd = new LoadFileCommand(invoker_.getActiveEditor(), new File(filename));
           invoker_.doCommand(cmd);
-          System.out.println("end uRFM actPer");
+          logger.debug("end uRFM actPer");
         }
       });
     }

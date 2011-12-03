@@ -61,7 +61,6 @@ public class SetLineStyleColorsDialog extends JDialog implements ActionListener{
 
   public SetLineStyleColorsDialog(JFrame parent, Line line) {
     super(parent, "Set LineStyle Colors", true);
-    System.out.println("slscd");
 
     rows_ = new HashSet<ColorRow>();
 

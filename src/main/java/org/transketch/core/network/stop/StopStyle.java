@@ -93,7 +93,6 @@ public class StopStyle implements NamedItem {
   }
 
   public void setTemplate(StopRendererTemplate template) {
-    System.out.println("setting template:");
     template_ = template;
     template_.print();
   }

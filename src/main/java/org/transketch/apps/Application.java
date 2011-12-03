@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.transketch.util.FPUtil;
 import org.transketch.util.SysProps;
 
@@ -39,21 +41,23 @@ import org.transketch.util.SysProps;
  * @author demory
  */
 public class Application {
+  private static final Logger logger = Logger.getLogger(Application.class);
   
   //protected FPEngine engine_;
 
   protected Properties sysProps_;
 
   public Application(String appMode, boolean initEngine) {
+    BasicConfigurator.configure();
 
     // get the home directory:
     String cdir = "";
     try {
       File cdirfile = new File(".");
       cdir = cdirfile.getCanonicalPath();
-      System.out.println("Current dir: " + cdir);
+      logger.info("Current home dir: " + cdir);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Error initializing home directory", e);
     }
    
     // initialize the system properties
@@ -115,7 +119,7 @@ public class Application {
       writer.close();
 
     } catch(Exception ex) {
-      ex.printStackTrace();
+      logger.error("error writing properties", ex);
     }
 
   }

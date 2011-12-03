@@ -85,7 +85,6 @@ public class StopStyles {
             if(id > maxID) maxID = id;
             String name = attributes.getNamedItem("name").getNodeValue();
 
-            //System.out.println("found style id="+id);
             StopStyle style = new StopStyle();
             style.setID(id);
             style.setName(name);

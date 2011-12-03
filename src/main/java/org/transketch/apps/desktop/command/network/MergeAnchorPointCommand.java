@@ -81,7 +81,6 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
     TSNetwork net = ed_.getDocument().getNetwork();
     net.deleteAnchorPoint(toMerge_, false);
     for(Corridor corr : deletedCorridors_) {
-      //System.out.println("del corr");
       net.deleteCorridor(corr);
       for(Line line : corr.getLines())
         line.removeCorridor(corr, false);

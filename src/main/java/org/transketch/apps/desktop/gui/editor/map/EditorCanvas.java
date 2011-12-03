@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.apache.log4j.Logger;
 import org.transketch.util.viewport.MapCoordinates;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.Editor;
@@ -67,6 +68,7 @@ import org.transketch.core.network.stop.Stop;
  * @author demory
  */
 public class EditorCanvas extends Viewport {
+  private final static Logger logger = Logger.getLogger(EditorCanvas.class);
 
   private Editor ed_;
   private TSInvoker invoker_;
@@ -221,9 +223,9 @@ public class EditorCanvas extends Viewport {
       if(hoverItem_ != null && hoverItem_.getDrawableType() == Drawable.Type.CORRIDOR) {
         Corridor corr = (Corridor) hoverItem_;
         if(line.size() == lineCorridors_.size() && !line.contains(corr)) {
-          //System.out.println("adding corr "+((Corridor) hoverItem_).getID());
+          //logger.debug("adding corr "+((Corridor) hoverItem_).getID());
           if(line.addCorridor(corr)) { // try adding single, presumably adjacent corridor
-            System.out.println("single addition success");
+            logger.debug("single addition success");
             lineAdditionPath_ = Collections.singletonList(corr);
             new Bundler(doc_.getNetwork());
             repaint = true;
@@ -432,7 +434,7 @@ public class EditorCanvas extends Viewport {
     if(numClicks == 2) {
       if(hoverItem_ != null && hoverItem_.getDrawableType() == Drawable.Type.LINE) {
         Line line = (Line) hoverItem_;
-        System.out.println(line);
+        logger.debug(line);
         //gui_.getControlFrameManager().getLinesFrame().selectRow(line);
       }
       return;
@@ -503,7 +505,7 @@ public class EditorCanvas extends Viewport {
           if(line == null) break;
           restoreLine(line);
           if(lineAdditionPath_ != null && lineAdditionPath_.size() > 0) {
-            System.out.println("adding "+lineAdditionPath_.size()+" corrs");
+            logger.debug("adding "+lineAdditionPath_.size()+" corrs");
             invoker_.doCommand(new AddCorridorsToLineCommand(ed_, line, lineAdditionPath_));
             //startEditingLine(line);
             repaint();
@@ -610,12 +612,12 @@ public class EditorCanvas extends Viewport {
   }
 
   public void keyPressed(KeyEvent e) {
-    System.out.println("pressed "+e.getKeyChar());
-    if(e.getKeyCode() == KeyEvent.VK_SHIFT) System.out.println("pressed");
+    logger.debug("pressed "+e.getKeyChar());
+    if(e.getKeyCode() == KeyEvent.VK_SHIFT) logger.debug("pressed");
   }
 
   public void keyReleased(KeyEvent e) {
-    if(e.getKeyCode() == KeyEvent.VK_SHIFT) System.out.println("released");
+    if(e.getKeyCode() == KeyEvent.VK_SHIFT) logger.debug("released");
   }
 
 

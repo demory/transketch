@@ -32,6 +32,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.TSDocument;
 import org.transketch.apps.desktop.gui.TranSketchGUI;
@@ -41,6 +42,7 @@ import org.transketch.apps.desktop.gui.TranSketchGUI;
  * @author demory
  */
 public class Viewport extends JPanel implements TSCanvas, ResolutionListener {
+  private final static Logger logger = Logger.getLogger(Viewport.class);
 
   protected TranSketchGUI gui_;
   protected TSDocument doc_;
@@ -182,11 +184,11 @@ public class Viewport extends JPanel implements TSCanvas, ResolutionListener {
 
   public void setReference() {
     refRect_ = new Rectangle2D.Double(coords_.getX1(), coords_.getY1(), coords_.getXRange(), coords_.getYRange());
-    //System.out.println("refRect "+refRect_);
+    //logger.debug("refRect "+refRect_);
   }
 
   public void zoomRelative(double factor) {
-    //System.out.println("f="+factor);
+    //logger.debug("f="+factor);
     if(refRect_ == null) return;
 
     double mult = (factor > 0) ? .5 : 2;

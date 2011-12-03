@@ -26,19 +26,19 @@ package org.transketch.apps.desktop.command.file;
 
 import java.io.File;
 import javax.swing.JFileChooser;
-import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import org.apache.log4j.Logger;
+import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.TSDocument;
 import org.transketch.apps.desktop.TranSketch;
-import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
-import org.transketch.core.network.Bundler;
 
 /**
  *
  * @author demory
  */
 public class LoadFileCommand extends EditorBasedCommand {
+  private final static Logger logger = Logger.getLogger(LoadFileCommand.class);
 
   private File file_;
 
@@ -73,14 +73,8 @@ public class LoadFileCommand extends EditorBasedCommand {
     }
     ts.getRecentFiles().addFile(file_.getPath());
     final TSDocument doc = ts.getDocumentFactory().createDocumentFromFile(file_);
-    /*SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        //new Bundler(doc.getNetwork());
-      }
-    });*/
-    //new Bundler(doc.getNetwork());
     ts.addOpenDocument(doc);
-    System.out.println("opened file");
+    logger.info("opened file");
     return true;
   }
 

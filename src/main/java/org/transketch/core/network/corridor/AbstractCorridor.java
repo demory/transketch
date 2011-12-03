@@ -33,8 +33,10 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
+import org.transketch.core.network.Bundler;
 import org.transketch.core.network.LineStyleLayer;
 import org.transketch.util.FPUtil;
 import org.transketch.util.viewport.MapCoordinates;
@@ -44,6 +46,7 @@ import org.transketch.util.viewport.MapCoordinates;
  * @author demory
  */
 public abstract class AbstractCorridor implements Drawable {
+  private final static Logger logger = Logger.getLogger(AbstractCorridor.class);
 
   protected double thetaR_ = (3.0/4.0)*Math.PI;
   protected double radiusW_ = 2;
@@ -180,16 +183,16 @@ public abstract class AbstractCorridor implements Drawable {
       Line2D thisLine = new Line2D.Double(x1, y1, x2, y2);
       double thisTheta = FPUtil.getTheta(thisLine);
       if(thisTheta >= Math.PI) thisTheta -= Math.PI;
-      //System.out.println("thisLine "+thisLine.getP1() +" to "+thisLine.getP2());
+      //logger.debug("thisLine "+thisLine.getP1() +" to "+thisLine.getP2());
 
       if(prevLine != null) {
-        //System.out.println(" prevLine "+prevLine.getP1() +" to "+prevLine.getP2());
+        //logger.debug(" prevLine "+prevLine.getP1() +" to "+prevLine.getP2());
         double prevTheta = FPUtil.getTheta(prevLine);
         if(prevTheta >= Math.PI) prevTheta -= Math.PI;
         if(Math.abs(prevTheta-thisTheta) >= tol) {
           Point2D isect = FPUtil.lineLineIntersection(prevLine, thisLine);
           if(isect != null) {
-            //System.out.println(" prevLine isect "+isect);
+            //logger.debug(" prevLine isect "+isect);
             if(reverse) {
               x2 = isect.getX();
               y2 = isect.getY();
@@ -203,7 +206,7 @@ public abstract class AbstractCorridor implements Drawable {
       }
 
       if(nextLine != null) {
-        //System.out.println(" nextLine "+nextLine.getP1() +" to "+nextLine.getP2());
+        //logger.debug(" nextLine "+nextLine.getP1() +" to "+nextLine.getP2());
         
         double nextTheta = FPUtil.getTheta(nextLine);
         if(nextTheta >= Math.PI) nextTheta -= Math.PI;
@@ -212,7 +215,7 @@ public abstract class AbstractCorridor implements Drawable {
           Point2D isect = FPUtil.lineLineIntersection(nextLine, thisLine);
 
           if(isect != null) {
-            //System.out.println("  nextLine isect "+isect);
+            //logger.debug("  nextLine isect "+isect);
             if(reverse) {
               x1 = isect.getX();
               y1 = isect.getY();
@@ -226,14 +229,14 @@ public abstract class AbstractCorridor implements Drawable {
       }
 
       if(reverse) {
-        //System.out.println("gP str rev");
+        //logger.debug("gP str rev");
         path.moveTo(x2, y2);
         path.lineTo(x1, y1);
-        //System.out.println("lineto " +x1+","+y1);
+        //logger.debug("lineto " +x1+","+y1);
       }
 
       else {
-        //System.out.println("gP str fwd");
+        //logger.debug("gP str fwd");
         path.moveTo(x1, y1);
         path.lineTo(x2, y2);
       }
@@ -518,16 +521,16 @@ public abstract class AbstractCorridor implements Drawable {
     double oFDistW = coords.dxToWorld(offsetFrom);
     double oTDistW = coords.dxToWorld(offsetTo);
 
-    //System.out.println("offset "+offset+ " to " + distW);
+    //logger.debug("offset "+offset+ " to " + distW);
     if(isStraight()) {
 
       // special case: to be handled later or (preferably) avoided completely?
       /*if(offsetFrom != offsetTo) {
-        System.out.println("straight corridor with unequal offsets!");
+        logger.debug("straight corridor with unequal offsets!");
         return path; // nothing drawn in this case (for now)
       }*/
 
-      //System.out.println("applying straight offset");
+      //logger.debug("applying straight offset");
       Line2D.Double vec = FPUtil.createNormalizedVector(fPoint, tPoint, 1);
       double dx = vec.x2 - vec.x1, dy = vec.y2-vec.y1;
       AffineTransform rot = AffineTransform. getRotateInstance(-Math.PI/2);
@@ -537,7 +540,7 @@ public abstract class AbstractCorridor implements Drawable {
       tPoint.setLocation(tPoint.getX() + dest.x*oTDistW, tPoint.getY() + dest.y*oTDistW);
     }
     else {
-      //System.out.println("applying bent offset");
+      //logger.debug("applying bent offset");
       Point2D.Double e = constructElbow(fPoint.getX(), fPoint.getY(), tPoint.getX(), tPoint.getY());
       Line2D.Double vec;
       double dx, dy;
@@ -641,7 +644,7 @@ public abstract class AbstractCorridor implements Drawable {
 
   public double getStraightTheta() {
     //if(!isStraight()) return -1;
-    //System.out.println("gST "+(x2()-x1())+","+(y2()-y1()));
+    //logger.debug("gST "+(x2()-x1())+","+(y2()-y1()));
     double theta = FPUtil.getTheta(x2()-x1(), y2()-y1());
     if(theta >= Math.PI) theta -= Math.PI;
     return theta;
@@ -685,12 +688,12 @@ public abstract class AbstractCorridor implements Drawable {
 
     double theta = 360-Math.toDegrees(FPUtil.getTheta(x-arc.getCenterX(), y-arc.getCenterY()));
 
-    //System.out.println("angles: "+minAngle+" to "+maxAngle+", "+theta);
+    //logger.debug("angles: "+minAngle+" to "+maxAngle+", "+theta);
     
     if((theta >= minAngle && theta <= maxAngle) || (theta+360 >= minAngle && theta+360 <= maxAngle)) {
       double d = Math.abs(FPUtil.magnitude(x, y, arc.getCenterX(), arc.getCenterY()) - arc.width/2);
       //return Math.abs(FPUtil.magnitude(x, y, arc.getCenterX(), arc.getCenterY()) - arc.width/2);
-      //System.out.println("d="+d);
+      //logger.debug("d="+d);
       return d;
     }
 

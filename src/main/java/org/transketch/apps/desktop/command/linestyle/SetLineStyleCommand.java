@@ -44,7 +44,6 @@ public class SetLineStyleCommand extends EditorBasedCommand implements TSAction 
     super(ed);
     line_ = line;
     newStyle_ = style;
-    System.out.println("line = "+line);
     oldStyle_ = line.getStyle();
   }
 

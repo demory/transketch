@@ -25,6 +25,8 @@
 package org.transketch.apps.desktop;
 
 import java.io.File;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.command.TSCommand;
@@ -38,6 +40,7 @@ import org.transketch.apps.desktop.gui.TranSketchGUI;
  * @author demory
  */
 public class TranSketch extends Application implements TSInvoker {
+  private static final Logger logger =  Logger.getLogger(TranSketch.class);
 
   public final static String VERSION = "0.0";
 
@@ -52,6 +55,7 @@ public class TranSketch extends Application implements TSInvoker {
 
   public TranSketch() {
     super("transketch", false);
+    logger.info("Initializing Application");
 
     docFactory_ = new DocumentFactory();
     cmdFactory_ = new CommandFactory(this);

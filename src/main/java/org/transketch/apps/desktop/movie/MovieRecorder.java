@@ -48,12 +48,14 @@ import javax.media.datasink.*;
 import javax.media.format.VideoFormat;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author demory
  */
 public class MovieRecorder implements ControllerListener, DataSinkListener {
+  private final static Logger logger = Logger.getLogger(MovieRecorder.class);
 
   private CanvasPanel canvas_;
   private int firstYear_, lastYear_, stepDays_;
@@ -78,7 +80,7 @@ public class MovieRecorder implements ControllerListener, DataSinkListener {
     int width = 990, height = 740, frameRate = 24;
 
     int frameCount = 365*(lastYear_-firstYear_+1) / stepDays_;
-    System.out.println("frameCount="+frameCount);
+    logger.debug("frameCount="+frameCount);
 
     MediaLocator oml;
     String outputURL = "file:/home/demory/working/test.mov";
@@ -283,7 +285,7 @@ public class MovieRecorder implements ControllerListener, DataSinkListener {
 
   private void refreshFrame(Date curTime) {
     try {
-      System.out.println("refreshing frame");
+      logger.debug("refreshing frame");
       canvas_.setTime(curTime);
       canvas_.paintImmediately(0,0,canvas_.getWidth(), canvas_.getHeight());//repaint();
       BufferedImage img = new BufferedImage(canvas_.getWidth(), canvas_.getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -292,7 +294,7 @@ public class MovieRecorder implements ControllerListener, DataSinkListener {
       ImageIO.write(img, "jpeg", new File("/home/demory/5p/temp/foo.jpg"));
       //return img;
     } catch (IOException ex) {
-      ex.printStackTrace();
+      logger.error("refreshFrame() error", ex);
     }
   }
 
@@ -342,7 +344,7 @@ public class MovieRecorder implements ControllerListener, DataSinkListener {
       g2d.fillRect(leftPx, yMid-1, rightPx-leftPx, 3);
       double timeAfter = time_.getTime()-startTime_;
       double pct = timeAfter / (double) timeSpan_;
-      //System.out.println("pct="+pct+ "ta="+timeAfter+" span="+timeSpan_);
+      //logger.debug("pct="+pct+ "ta="+timeAfter+" span="+timeSpan_);
       double pctPx = pct * (rightPx-leftPx);
       g2d.fillRect(leftPx, yMid-5, (int) pctPx, 11);
 

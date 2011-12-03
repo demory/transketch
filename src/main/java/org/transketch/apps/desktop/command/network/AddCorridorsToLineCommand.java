@@ -77,7 +77,6 @@ public class AddCorridorsToLineCommand extends EditorBasedCommand implements TSA
         ed_.getPane().getCanvas().startEditingLine(line_);
       ed_.getDocument().getNetwork().rebundle();
     }
-    //System.out.println("success="+success);
     return success;
   }
 

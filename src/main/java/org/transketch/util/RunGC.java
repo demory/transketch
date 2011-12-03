@@ -21,10 +21,13 @@
  */
 package org.transketch.util;
 
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.Timer;
+import org.apache.log4j.Logger;
 
 public class RunGC implements ActionListener {
+  private final static Logger logger = Logger.getLogger(RunGC.class);
 
   private Runtime runtime_;
   private Timer timer_;
@@ -38,10 +41,10 @@ public class RunGC implements ActionListener {
   }
 
   public void actionPerformed(ActionEvent e) {
-    System.out.println("Direct call to GC");
-    System.out.println("mem before gc: " + (runtime_.totalMemory() - runtime_.freeMemory()));
+    logger.info("Direct call to GC");
+    logger.info("mem before gc: " + (runtime_.totalMemory() - runtime_.freeMemory()));
     System.gc();
-    System.out.println("mem after gc: " + (runtime_.totalMemory() - runtime_.freeMemory()));
+    logger.info("mem after gc: " + (runtime_.totalMemory() - runtime_.freeMemory()));
   }
 }
 

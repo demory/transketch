@@ -32,13 +32,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.gui.DocumentFrame;
 import org.transketch.core.network.TSNetwork;
 import org.transketch.core.network.Line;
@@ -57,6 +56,7 @@ import org.w3c.dom.NodeList;
  * @author demory
  */
 public class TSDocument {
+  private final static Logger logger = Logger.getLogger(TSDocument.class);
 
   private int id_;
 
@@ -114,7 +114,7 @@ public class TSDocument {
   }
 
   public void readXMLFile(File file) {
-    System.out.println("Loading transit data from XML file");
+    logger.info("Loading transit data from XML file");
 
     try {
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -122,7 +122,7 @@ public class TSDocument {
       NodeList docNodes = doc.getChildNodes();
       Node thisNode = docNodes.item(0);
       if (!thisNode.getNodeName().equals("transketch")) {
-        System.out.println("Not a valid Transit Sketchpad data file");
+        logger.error("Not a valid Transit Sketchpad data file");
         return;
       }
 
@@ -131,9 +131,9 @@ public class TSDocument {
       network_.readFromXML(thisNode);
       
       activeFile_ = file;
-      //System.out.println("af="+activeFile_);
+      //logger.debug("af="+activeFile_);
     } catch(Exception e) {
-      e.printStackTrace();
+      logger.error("error reading xml", e);
     }
   }
 
@@ -156,16 +156,16 @@ public class TSDocument {
       activeFile_ = file;
 
     } catch(Exception e) {
-      e.printStackTrace();
+      logger.error("error writing xml", e);
     }
   }
 
   public void writePNGFile(File file, MapCoordinates coords) {
 
     Rectangle2D bbox = network_.getBoundingBox();
-    System.out.println("dimW: "+bbox.getWidth()+" x "+bbox.getHeight());
+    logger.debug("dimW: "+bbox.getWidth()+" x "+bbox.getHeight());
     int w = coords.distToScreen(bbox.getWidth()), h = coords.distToScreen(bbox.getHeight());
-    System.out.println("dimP: "+w+" x "+h);
+    logger.debug("dimP: "+w+" x "+h);
 
     BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
     Graphics2D g2d = (Graphics2D) img.getGraphics();
@@ -192,7 +192,7 @@ public class TSDocument {
     try {
       ImageIO.write(img, "png", file);
     } catch (IOException ex) {
-      Logger.getLogger(TSDocument.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error writing png", ex);
     }
   }
   
@@ -218,7 +218,7 @@ public class TSDocument {
     try {
       svg.stream(new FileWriter(file), false);
     } catch (IOException ex) {
-      Logger.getLogger(TSDocument.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error writing svg", ex);
     }
 
   }

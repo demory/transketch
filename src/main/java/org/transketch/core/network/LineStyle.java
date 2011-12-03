@@ -153,7 +153,6 @@ public class LineStyle implements Comparable<LineStyle>, LineStyleView, NamedIte
   }
 
   public void addSubStyle(LineSubStyle sub) {
-    System.out.println("adding substyle");
     subStyles_.add(sub);
   }
 

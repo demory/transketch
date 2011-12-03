@@ -46,7 +46,6 @@ public class MapCoordinates {
   }
 
   public MapCoordinates(double x1, double y1, double x2, double y2, double w, double h) {
-    System.out.println("MC init");
     x1_ = x1;
     x2_ = x2;
     y1_ = y1;
@@ -186,7 +185,6 @@ public class MapCoordinates {
     }
     int xdist = distToScreen(Math.min(Math.abs(pt.getX() - x1_), Math.abs(pt.getX() - x2_)));
     int ydist = distToScreen(Math.min(Math.abs(pt.getY() - y1_), Math.abs(pt.getY() - y2_)));
-    System.out.println(xdist + " " + ydist);
     return xdist <= tolerance || ydist <= tolerance;
 
   }

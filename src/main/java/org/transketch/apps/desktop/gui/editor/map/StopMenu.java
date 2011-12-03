@@ -144,7 +144,6 @@ public class StopMenu extends MapContextMenu {
       addMenuListener(new MenuListener() {
 
         public void menuSelected(MenuEvent e) {
-          //System.out.println("StopStyle menu selected");
           removeAll();
 
           JMenuItem item = new JMenuItem("DEFAULT");

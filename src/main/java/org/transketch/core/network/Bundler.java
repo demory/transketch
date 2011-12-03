@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.log4j.Logger;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.core.network.stop.Stop;
 import org.transketch.util.FPUtil;
@@ -45,6 +46,8 @@ import org.transketch.util.FPUtil;
  * @author demory
  */
 public class Bundler {
+  
+  private final static Logger logger = Logger.getLogger(Bundler.class);
 
   // maps anchor pts to collections of angle-bundle pairs
   //private Map<AnchorPoint, Map<Integer, Bundle>> bundles_;
@@ -82,8 +85,8 @@ public class Bundler {
         Map<Integer, Bundle> bundlesAtPt;
         Bundle bundle;
 
-        //System.out.println("corr "+c.getID());
-        //System.out.println("from "+from.getID()+" to "+to.getID());
+        //logger.debug("corr "+c.getID());
+        //logger.debug("from "+from.getID()+" to "+to.getID());
 
         // handle segment in the "forward" direction (starting with "from" point)
         if(c.isStraight()) theta = (int) Math.toDegrees(FPUtil.getTheta(to.getX()-from.getX(), to.getY()-from.getY()));
@@ -91,7 +94,7 @@ public class Bundler {
           Point2D.Double e = c.getElbow();
           theta = (int) Math.toDegrees(FPUtil.getTheta(e.x - from.getX(), e.y - from.getY()));
         }
-        //System.out.println("fw theta = "+theta);
+        //logger.debug("fw theta = "+theta);
         bundlesAtPt = from.getBundles(); //bundles_.get(from);
         if(!bundlesAtPt.containsKey(theta)) bundlesAtPt.put(theta, new Bundle(from, theta));
         bundle = bundlesAtPt.get(theta);
@@ -103,7 +106,7 @@ public class Bundler {
           Point2D.Double e = c.getElbow();
           theta = (int) Math.toDegrees(FPUtil.getTheta(e.x - to.getX(), e.y - to.getY()));
         }
-        //System.out.println("bw theta = "+theta);
+        //logger.debug("bw theta = "+theta);
         bundlesAtPt = to.getBundles(); //bundles_.get(to);
         if(!bundlesAtPt.containsKey(theta)) bundlesAtPt.put(theta, new Bundle(to, theta));
         bundle = bundlesAtPt.get(theta);
@@ -127,14 +130,14 @@ public class Bundler {
         LineInfo lines[] = (LineInfo[]) b.lines_.toArray(new LineInfo[b.lines_.size()]);
         for(int i = 0; i < lines.length; i++) {
           for(int j = i+1; j < lines.length; j++) {
-            //System.out.println("init comp "+lines[i]+" & "+lines[j]);
+            //logger.debug("init comp "+lines[i]+" & "+lines[j]);
             initComparison(b, lines[i], lines[j]);
           }
         }
       }
     }
 
-    //System.out.println(comparisons_.size()+" comparisons after diversion phase");
+    //logger.debug(comparisons_.size()+" comparisons after diversion phase");
 
     // initialize containment-based comparisons:
     Line lines[] = (Line[]) network.getLines().toArray(new Line[network.getLines().size()]);
@@ -164,21 +167,21 @@ public class Bundler {
       }
     }
 
-    //System.out.println(comparisons_.size()+" comparisons after containment` phase");
+    //logger.debug(comparisons_.size()+" comparisons after containment` phase");
 
     /*for(Comparison c: comparisons_) {
-      System.out.println(" "+c.lesser_.toString()+ " < "+c.greater_.toString());
+      logger.debug(" "+c.lesser_.toString()+ " < "+c.greater_.toString());
     }*/
   }
 
   //private void initComparison(AnchorPoint anchor, LineInfo line1, LineInfo line2) {
   private void initComparison(Bundle bundle, LineInfo line1, LineInfo line2) {
-    //System.out.println("--IC--");
-    //System.out.println("anchor="+bundle.anchor_);
+    //logger.debug("--IC--");
+    //logger.debug("anchor="+bundle.anchor_);
     AnchorPoint anchor = bundle.anchor_;
     AnchorPoint opp1 = line1.corr_.opposite(anchor);
     AnchorPoint opp2 = line2.corr_.opposite(anchor);
-    //System.out.println("opp1="+opp1+", opp2="+opp2);
+    //logger.debug("opp1="+opp1+", opp2="+opp2);
 
 
     Corridor c1 = line1.corr_;
@@ -186,7 +189,7 @@ public class Bundler {
 
     Corridor adj1 = line1.line_.adjacent(line1.corr_, anchor);
     Corridor adj2 = line2.line_.adjacent(line2.corr_, anchor);
-    //System.out.println("adj1="+adj1+", adj2="+adj2);
+    //logger.debug("adj1="+adj1+", adj2="+adj2);
 
     // try comparing opposite points first
     if(opp1 != opp2) {
@@ -207,19 +210,19 @@ public class Bundler {
       else // both are straight
         return;
 
-      //System.out.println(" ("+opp1.getX()+", "+opp1.getY()+")");
-      //System.out.println(" ("+pt.x+", "+pt.y+")");
-      //System.out.println(" ("+opp2.getX()+", "+opp2.getY()+")");
+      //logger.debug(" ("+opp1.getX()+", "+opp1.getY()+")");
+      //logger.debug(" ("+pt.x+", "+pt.y+")");
+      //logger.debug(" ("+opp2.getX()+", "+opp2.getY()+")");
 
       int ccw = Line2D.relativeCCW(opp1.getX(), opp1.getY(), opp2.getX(), opp2.getY(), pt.x, pt.y);
-      //System.out.println(" ccw = "+ccw);
+      //logger.debug(" ccw = "+ccw);
       if(ccw == 1) { // a counterclockwise or "right" turn: line2 bundled before line1
-        //System.out.println(" right turn, 2 < 1");
+        //logger.debug(" right turn, 2 < 1");
         comparisons_.add(new Comparison(line1, line2));
         comparisons_.add(new Comparison(line2.getReverse(), line1.getReverse()));
       }
       else if(ccw == -1) { // a clockwise or "left" turn: line2 bundled before line1
-        //System.out.println(" left turn, 1 < 2");
+        //logger.debug(" left turn, 1 < 2");
         comparisons_.add(new Comparison(line2, line1));
         comparisons_.add(new Comparison(line1.getReverse(), line2.getReverse()));
       }
@@ -236,14 +239,14 @@ public class Bundler {
       }
 
       /*int ccw = Line2D.relativeCCW(opp1.getX(), opp1.getY(), pt.x, pt.y, opp2.getX(), opp2.getY());
-      System.out.println(" ccw = "+ccw);
+      logger.debug(" ccw = "+ccw);
       if(ccw == 1) { // a counterclockwise or "right" turn: line2 bundled before line1
-        //System.out.println(" right turn, 2 < 1");
+        //logger.debug(" right turn, 2 < 1");
         comparisons_.add(new Comparison(line2, line1));
         comparisons_.add(new Comparison(line1.getReverse(), line2.getReverse()));
       }
       if(ccw == -1 || ccw == 0) { // a clockwise or "left" turn: line2 bundled before line1
-        //System.out.println(" left turn, 1 < 2");
+        //logger.debug(" left turn, 1 < 2");
         comparisons_.add(new Comparison(line1, line2));
         comparisons_.add(new Comparison(line2.getReverse(), line1.getReverse()));
       }*/
@@ -267,15 +270,15 @@ public class Bundler {
       if(dt1 < 0) dt1 += 360;
       int dt2 = theta2 - bundle.theta_;
       if(dt2 < 0) dt2 += 360;
-      //System.out.println("dt1="+dt1+", dt2="+dt2);
+      //logger.debug("dt1="+dt1+", dt2="+dt2);
 
       if(dt1 < dt2) { // line1 bundled before line1
-        //System.out.println(" 1 < 2");
+        //logger.debug(" 1 < 2");
         comparisons_.add(new Comparison(line1, line2));
         comparisons_.add(new Comparison(line2.getReverse(), line1.getReverse()));
       }
       else if(dt2 < dt1) { // line2 bundled before line1
-        //System.out.println(" 2 < 1");
+        //logger.debug(" 2 < 1");
         comparisons_.add(new Comparison(line2, line1));
         comparisons_.add(new Comparison(line1.getReverse(), line2.getReverse()));
       }
@@ -285,7 +288,7 @@ public class Bundler {
 
   
   public void assignOffsets(TSNetwork network) {
-    //System.out.println("--aO--");
+    //logger.debug("--aO--");
     for(Line line : network.getLines())
       line.clearOffsets();
 
@@ -300,7 +303,7 @@ public class Bundler {
     }
     Collections.sort(sortedBundles);
 
-    //System.out.println("sortedBundles size="+sortedBundles.size());
+    //logger.debug("sortedBundles size="+sortedBundles.size());
 
     while(!sortedBundles.isEmpty()) {
       // get the largest remaining bundle:
@@ -308,7 +311,7 @@ public class Bundler {
       if(b.size() == 1) break;
 
       // sort the bundle itself:
-      //System.out.println("sorting bundle "+b.anchor_.getID()+":"+b.theta_+" size="+b.lines_.size());
+      //logger.debug("sorting bundle "+b.anchor_.getID()+":"+b.theta_+" size="+b.lines_.size());
       List<LineInfo> bundledLines = new LinkedList<LineInfo>();
       for(LineInfo li : b.lines_) bundledLines.add(li);
       Collections.sort(bundledLines, new BundledLineComparator());
@@ -342,7 +345,7 @@ public class Bundler {
     String str = line.getID()+"_"+anchor.getID()+"_"+theta;
     if(assignedOffsets_.contains(str)) return;
    
-    //if(anchor.getID() == 7) System.out.println(" assigning offset "+offset+" to "+line.getName()+"_"+anchor.getID()+"_"+theta);
+    //if(anchor.getID() == 7) logger.debug(" assigning offset "+offset+" to "+line.getName()+"_"+anchor.getID()+"_"+theta);
 
     Line.CorridorInfo ci = line.getCorridorInfo(corr);
     if(anchor == corr.fPoint()) ci.offsetFrom_ = offset;
@@ -377,17 +380,17 @@ public class Bundler {
   }
 
   public void print() {
-    /*System.out.println("-- PRINTING BUNDLES --");
+    /*logger.debug("-- PRINTING BUNDLES --");
     for(AnchorPoint pt : bundles_.keySet()) {
-      System.out.println("Point "+pt.getID());
+      logger.debug("Point "+pt.getID());
       for(Map.Entry<Integer, Bundle> entry : bundles_.get(pt).entrySet()) {
-        System.out.println("  Bundle at "+entry.getKey()+" degrees:");
+        logger.debug("  Bundle at "+entry.getKey()+" degrees:");
         for(LineInfo line : entry.getValue().lines_) {
-          System.out.println("    "+line.toString());
+          logger.debug("    "+line.toString());
         }
       }
     }
-    System.out.println("-- END BUNDLES --");*/
+    logger.debug("-- END BUNDLES --");*/
   }
 
   
@@ -396,15 +399,15 @@ public class Bundler {
     Set<Corridor> corrs = new HashSet<Corridor>(network.getCorridors());
     straightaways_ = new HashSet<Straightaway>();
     while(!corrs.isEmpty()) {
-      //System.out.println("corrs size="+corrs.size());
+      //logger.debug("corrs size="+corrs.size());
       Corridor corr = corrs.iterator().next();
-      //System.out.println("considering: "+corr);
+      //logger.debug("considering: "+corr);
 
       /*if(corr.isVertical()) {
-        //System.out.println(" vert");
+        //logger.debug(" vert");
       }
       else if(corr.isHorizontal()) {
-        //System.out.println(" horiz");
+        //logger.debug(" horiz");
       }*/
       if(corr.isStraight()) {
 
@@ -422,7 +425,7 @@ public class Bundler {
       Corridor next = network.getStraightExtension(corr, corr.fPoint());
       AnchorPoint curPt = corr.fPoint();
       while(next != null) {
-        //System.out.println("  next="+corr.getID());
+        //logger.debug("  next="+corr.getID());
         saCorrs.add(0, next);
         corrs.remove(next);
         curPt = next.opposite(curPt);
@@ -440,12 +443,12 @@ public class Bundler {
       }
 
       Straightaway sa = new Straightaway(saCorrs);
-      //System.out.println("new SA: "+sa.toString());
-      //System.out.println(" left: "+corrs.toString());
+      //logger.debug("new SA: "+sa.toString());
+      //logger.debug(" left: "+corrs.toString());
       straightaways_.add(sa);
     }
 
-    //System.out.println("constructed "+straightaways_.size()+" straightaways");
+    //logger.debug("constructed "+straightaways_.size()+" straightaways");
   }
 
   public void processStraightaways(TSNetwork network) {
@@ -459,7 +462,7 @@ public class Bundler {
         }
       }
       if(needsAttention) {
-        //System.out.println(sa.toString()+ " needs attention");
+        //logger.debug(sa.toString()+ " needs attention");
         if(sa.corridors_.size() == 1) {
           fixCorridor(sa.corridors_.get(0), sa.corridors_.get(0).fPoint());
         }
@@ -476,10 +479,10 @@ public class Bundler {
           }
 
           double offsetEnv[] = sa.getOffsetEnvelope();
-          //System.out.println("  Final range: "+offsetEnv[0]+" to "+offsetEnv[1]);
+          //logger.debug("  Final range: "+offsetEnv[0]+" to "+offsetEnv[1]);
           double adjustment = -(offsetEnv[0]+offsetEnv[1])/2;
           if(adjustment != 0) {
-            //System.out.println("  Adjusting by "+adjustment);
+            //logger.debug("  Adjusting by "+adjustment);
             pt = startPt;
             for(Corridor c : sa.corridors_) {
               bumpPointOut(pt, c, adjustment);
@@ -497,28 +500,28 @@ public class Bundler {
   }
 
   private void fixCorridor(Corridor c, AnchorPoint start) {
-    //System.out.println(" fixing corr "+c.getID() + " from pt "+start.getID());
+    //logger.debug(" fixing corr "+c.getID() + " from pt "+start.getID());
     Set<Double> deltas = new HashSet<Double>();
     for(Line l : c.getLines()) {
       Line.CorridorInfo ci = l.getCorridorInfo(c);
       double delta = -(ci.offsetTo_-ci.offsetFrom_);
       //if(c.fPoint() != start) delta = -delta;
       deltas.add(delta);
-      //System.out.println("  l="+l.getName()+" d="+delta);
+      //logger.debug("  l="+l.getName()+" d="+delta);
     }
 
     if(deltas.size() == 1) {
       double delta = deltas.iterator().next();
       if(delta == 0) {
-        //System.out.println("  does not need fixing");
+        //logger.debug("  does not need fixing");
       }
       else {
         bumpPointIn(c.opposite(start), c, delta);
-        //System.out.println("  clean fix");
+        //logger.debug("  clean fix");
       }
     }
     else if(deltas.size() > 1) {
-      System.out.println("  fixCorridor special case!! c="+c.getID());
+      logger.debug("  fixCorridor special case!! c="+c.getID());
     }
   }
 
@@ -551,11 +554,11 @@ public class Bundler {
     String inTheta = (inBundle != null) ? ""+inBundle.theta_ : "n/a";
     String outTheta = (outBundle != null) ? ""+outBundle.theta_ : "n/a";
     
-    //System.out.println("bb "+pt.getID()+" "+inTheta+"-"+outTheta+" d"+delta);
+    //logger.debug("bb "+pt.getID()+" "+inTheta+"-"+outTheta+" d"+delta);
     
     if(inBundle != null) {
       for(LineInfo l : inBundle.lines_) {
-        //System.out.println("      * "+l.toString()+ "; offsets: "+ci.offsetFrom_+"/"+ci.offsetTo_);
+        //logger.debug("      * "+l.toString()+ "; offsets: "+ci.offsetFrom_+"/"+ci.offsetTo_);
         if(l.dir_ == LineInfo.Direction.BACKWARD) {
           if(l.corr_.fPoint() == pt) l.line_.getCorridorInfo(l.corr_).offsetFrom_ -=delta;
           else if(l.corr_.tPoint() == pt) l.line_.getCorridorInfo(l.corr_).offsetTo_ +=delta;
@@ -567,9 +570,9 @@ public class Bundler {
       }
     }
     if(outBundle != null) {
-      //System.out.println("   - out:");
+      //logger.debug("   - out:");
       for(LineInfo l : outBundle.lines_) {
-        //System.out.println("      * "+l.toString()+ "; offsets: "+ci.offsetFrom_+"/"+ci.offsetTo_);
+        //logger.debug("      * "+l.toString()+ "; offsets: "+ci.offsetFrom_+"/"+ci.offsetTo_);
         if(l.dir_ == LineInfo.Direction.BACKWARD) {
           if(l.corr_.fPoint() == pt) l.line_.getCorridorInfo(l.corr_).offsetFrom_ += delta;
           if(l.corr_.tPoint() == pt) l.line_.getCorridorInfo(l.corr_).offsetTo_ -= delta;
@@ -587,12 +590,12 @@ public class Bundler {
     thetaR += Math.PI/2;
     pt.applyBundleOffset(Math.cos(thetaR)*delta, Math.sin(thetaR)*delta);
 
-    //System.out.println("   - bumped");
+    //logger.debug("   - bumped");
     //bumped_++;
   }
    
   private static double[] checkPointOffsetsOut(AnchorPoint pt, Corridor out) {
-    //System.out.println("**  check pt "+pt.getID()+", out "+out.getID());
+    //logger.debug("**  check pt "+pt.getID()+", out "+out.getID());
     AnchorPoint opp = out.opposite(pt);
     int outAngle = (int) Math.toDegrees(FPUtil.getTheta(opp.getX()-pt.getX(), opp.getY()-pt.getY()));
     int inAngle = oppositeTheta(outAngle);
@@ -604,7 +607,7 @@ public class Bundler {
   }
 
   private static double[] checkPointOffsetsIn(AnchorPoint pt, Corridor in) {
-    //System.out.println("**  check pt "+pt.getID()+", out "+out.getID());
+    //logger.debug("**  check pt "+pt.getID()+", out "+out.getID());
     AnchorPoint opp = in.opposite(pt);
     int inAngle = (int) Math.toDegrees(FPUtil.getTheta(opp.getX()-pt.getX(), opp.getY()-pt.getY()));
     int outAngle = oppositeTheta(inAngle);
@@ -624,7 +627,7 @@ public class Bundler {
         double offset = 0;
         if(li.corr_.fPoint() == pt) offset = li.line_.getCorridorInfo(li.corr_).offsetFrom_;
         else offset = -li.line_.getCorridorInfo(li.corr_).offsetTo_;
-        //System.out.println("**   o-line "+li.line_.getName()+" (corr "+li.corr_ +"), offset "+offset);
+        //logger.debug("**   o-line "+li.line_.getName()+" (corr "+li.corr_ +"), offset "+offset);
         max = Math.max(max, offset);
         min = Math.min(min, offset);
       }
@@ -635,7 +638,7 @@ public class Bundler {
         double offset = 0;
         if(li.corr_.fPoint() == pt) offset = -li.line_.getCorridorInfo(li.corr_).offsetFrom_;
         else offset = li.line_.getCorridorInfo(li.corr_).offsetTo_;
-        //System.out.println("**   i-line "+li.line_.getName()+" (corr "+li.corr_ +"), offset "+offset);
+        //logger.debug("**   i-line "+li.line_.getName()+" (corr "+li.corr_ +"), offset "+offset);
         max = Math.max(max, offset);
         min = Math.min(min, offset);
       }
@@ -647,7 +650,7 @@ public class Bundler {
     for(Stop stop : net.getStops()) {
       if(stop.getType() == Stop.Type.ANCHORBASED) {
         AnchorPoint pt = ((AnchorBasedStop) stop).getAnchorPoint();
-        System.out.println("abStop at "+pt.getID());
+        logger.debug("abStop at "+pt.getID());
         Set<Bundle> visited = new HashSet<Bundle>();
         for(Map.Entry<Integer, Bundle> e : pt.getBundles().entrySet()) {
           int theta = e.getKey();
@@ -655,7 +658,7 @@ public class Bundler {
           if(visited.contains(b)) continue;
           Bundle oppBundle = pt.getBundles().get(oppositeTheta(theta));
           double[] env = checkPointOffsets(pt, b, oppBundle);
-          System.out.println("  - th "+theta+", "+env[0]+" to "+env[1]);
+          logger.debug("  - th "+theta+", "+env[0]+" to "+env[1]);
         }
       }
     }
@@ -760,7 +763,7 @@ public class Bundler {
   public class BundledLineComparator implements Comparator<LineInfo> {
 
     public int compare(LineInfo o1, LineInfo o2) {
-      //System.out.println("comparing "+o1.toString()+" and "+o2.toString());
+      //logger.debug("comparing "+o1.toString()+" and "+o2.toString());
       int ret = 0;
       Comparison lessThan = new Comparison(o1, o2); // assume o1 < o2
       Comparison greaterThan = new Comparison(o2, o1); // assume o1 > o2
@@ -768,7 +771,7 @@ public class Bundler {
         if(c.equals(lessThan)) ret--;
         if(c.equals(greaterThan)) ret++;        
       }
-      //System.out.println("blc ret="+ret);
+      //logger.debug("blc ret="+ret);
       if(ret == 0) {
         ret = new Integer(o1.hash()).compareTo(o2.hash());
       }
@@ -805,11 +808,11 @@ public class Bundler {
       for(int i=0; i < corridors_.size(); i++) {
         Corridor c =corridors_.get(i);
         AnchorPoint to = c.opposite(from);
-        //System.out.println("** corr "+c.getID());
+        //logger.debug("** corr "+c.getID());
 
         double[] outRange = checkPointOffsetsOut(from, c);
         if(outRange != null) {
-          //System.out.println("   outrange: "+outRange[0]+" to "+outRange[1]);
+          //logger.debug("   outrange: "+outRange[0]+" to "+outRange[1]);
           min = Math.min(min, outRange[0]);
           max = Math.max(max, outRange[1]);
         }
@@ -817,7 +820,7 @@ public class Bundler {
         if(i == corridors_.size()-1) {
           double[] inRange = checkPointOffsetsIn(to, c);
           if(inRange != null) {
-            //System.out.println("   inrange: "+inRange[0]+" to "+inRange[1]);
+            //logger.debug("   inrange: "+inRange[0]+" to "+inRange[1]);
             min = Math.min(min, inRange[0]);
             max = Math.max(max, inRange[1]);
           }

@@ -26,7 +26,6 @@ package org.transketch.apps.desktop.gui.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -45,13 +44,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -59,6 +55,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.apache.log4j.Logger;
 import org.transketch.util.FPUtil;
 import org.transketch.util.gui.GUIFactory;
 import org.transketch.util.viewport.Viewport;
@@ -68,7 +65,7 @@ import org.transketch.util.viewport.Viewport;
  * @author demory
  */
 public class ResolutionRangeSelector extends JPanel {
-
+  private final static Logger logger = Logger.getLogger(ResolutionRangeSelector.class);
 
   private Viewport viewport_;
   //private List<Double> bounds_  = new ArrayList<Double>();
@@ -131,7 +128,7 @@ public class ResolutionRangeSelector extends JPanel {
     zoomSlider_.setPreferredSize(new Dimension(50, 20));
     zoomSlider_.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        //System.out.println(""+zoomSlider_.getValue());
+        //logger.debug(""+zoomSlider_.getValue());
         double factor = (double) (zoomSlider_.getValue()-50) / 50.0;
         if(doZoom_) viewport_.zoomRelative(factor);
       }
@@ -146,7 +143,7 @@ public class ResolutionRangeSelector extends JPanel {
 
       @Override
       public void mouseReleased(MouseEvent e) {
-        //System.out.println("release!");
+        //logger.debug("release!");
         doZoom_ = false;
         zoomSlider_.setValue(50);
       }
@@ -175,7 +172,7 @@ public class ResolutionRangeSelector extends JPanel {
   }
 
   private void addBreakpoint(double reso) {
-    System.out.println("new breakpoint at "+reso);
+    logger.debug("new breakpoint at "+reso);
     if(breakpoints_.contains(reso)) {
       JOptionPane.showMessageDialog(null, "Breakpoint at that resolution already exists");
       return;
@@ -209,7 +206,7 @@ public class ResolutionRangeSelector extends JPanel {
   }
 
   public void setSelectedRange(int selRange) {
-    System.out.println("selecting "+selRange);
+    logger.debug("selecting "+selRange);
     selRange_ = selRange;
     rangePanel_.repaint();
     lowerPanel_.repaint();
@@ -253,7 +250,7 @@ public class ResolutionRangeSelector extends JPanel {
             mouseOverLabel_ = mouseOverRange_ = -1;
             for(int i=0; i<bpLabelBounds_.size(); i++) {
               if(bpLabelBounds_.get(i).contains(e.getX(), e.getY())) {
-                //System.out.println("over bp "+i);
+                //logger.debug("over bp "+i);
                 mouseOverLabel_ = i;
               }
             }
@@ -307,7 +304,7 @@ public class ResolutionRangeSelector extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
-      //System.out.println("paint rrs rp");
+      //logger.debug("paint rrs rp");
 
       Graphics2D g2d = (Graphics2D) g;
 
@@ -426,16 +423,16 @@ public class ResolutionRangeSelector extends JPanel {
 
     public void updateLocation() {
       int x = resoToPixel(reso_);
-      System.out.println("uL bp="+reso_+" x="+x);
+      logger.debug("uL bp="+reso_+" x="+x);
       setLocation((int) x - 1, labelRowH_);
       int lx = x - label_.getWidth()/2;
-      System.out.println(" lx="+lx);
+      logger.debug(" lx="+lx);
       label_.setLocation(lx, labelRowH_-14);
     }
 
     @Override
     public void paintComponent(Graphics g) {
-      System.out.println("pC bp="+reso_);
+      logger.debug("pC bp="+reso_);
       Graphics2D g2d = (Graphics2D) g;
       updateLocation();
       g2d.setColor(rangePanel_.getBackground());

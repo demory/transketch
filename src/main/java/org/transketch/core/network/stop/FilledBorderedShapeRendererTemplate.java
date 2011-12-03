@@ -73,8 +73,6 @@ public class FilledBorderedShapeRendererTemplate extends StopRendererTemplate {
   }
 
   public Object clone() {
-    //System.out.println("clone oT v="+outlineThickness_.getValue()+ " obj="+outlineThickness_);
-    //this.print();
     return new FilledBorderedShapeRendererTemplate(this);
   }
 }

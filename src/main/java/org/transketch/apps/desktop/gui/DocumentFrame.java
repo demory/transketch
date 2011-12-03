@@ -24,7 +24,6 @@
 
 package org.transketch.apps.desktop.gui;
 
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import javax.swing.JInternalFrame;
@@ -33,6 +32,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSDocument;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.command.file.SaveFileAsCommand;
@@ -45,6 +45,7 @@ import org.transketch.util.viewport.MapCoordinates;
  * @author demory
  */
 public class DocumentFrame extends JInternalFrame {
+  private final static Logger logger = Logger.getLogger(DocumentFrame.class);
 
   private TSDocument doc_;
 
@@ -70,7 +71,7 @@ public class DocumentFrame extends JInternalFrame {
     this.addComponentListener(new ComponentAdapter() {
       @Override
       public void componentResized(ComponentEvent e) {
-        //System.out.println("map resized");
+        //logger.debug("map resized");
         edPane_.getCanvas().resized();
       }
     });
@@ -95,7 +96,7 @@ public class DocumentFrame extends JInternalFrame {
         edPane_.getCanvas().deactivateKeyListener();
         gui_.documentFrameClosed(DocumentFrame.this);
         setVisible(false);
-        System.out.println("closed");
+        logger.info("document frame closed");
       }
     });
 
@@ -109,7 +110,7 @@ public class DocumentFrame extends JInternalFrame {
     this.pack();
 
     edPane_.getCanvas().requestFocusInWindow();
-    System.out.println("rFIW");
+    logger.debug("rFIW");
     gui.documentFrameOpened(this);
 
     SwingUtilities.invokeLater(new Runnable() {

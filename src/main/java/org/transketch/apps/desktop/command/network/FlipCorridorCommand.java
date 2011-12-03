@@ -44,7 +44,6 @@ public class FlipCorridorCommand extends EditorBasedCommand implements TSAction 
 
   public boolean doThis(TranSketch ts) {
     corr_.flip();
-    //System.out.println("flipped!");
     ed_.getDocument().getNetwork().rebundle();
     return true;
   }

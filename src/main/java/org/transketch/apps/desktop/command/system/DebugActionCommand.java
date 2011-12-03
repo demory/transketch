@@ -24,6 +24,7 @@
 
 package org.transketch.apps.desktop.command.system;
 
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
@@ -34,13 +35,15 @@ import org.transketch.core.network.corridor.Corridor;
  * @author demory
  */
 public class DebugActionCommand extends EditorBasedCommand {
+  private final static Logger logger = Logger.getLogger(DebugActionCommand.class);
+
 
   public DebugActionCommand(Editor ed) {
     super(ed);
   }
 
   public boolean doThis(TranSketch ts) {
-    System.out.println("debug");
+    logger.debug("running debug action");
     for(Corridor c: ed_.getDocument().getNetwork().getCorridors()) c.flip();
     return false;
   }

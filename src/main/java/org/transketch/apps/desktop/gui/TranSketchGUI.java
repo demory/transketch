@@ -41,6 +41,7 @@ import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSDocument;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
@@ -53,6 +54,7 @@ import org.transketch.util.SysProps;
  * @author demory
  */
 public class TranSketchGUI extends JFrame {
+  private final static Logger logger = Logger.getLogger(TranSketchGUI.class);
 
   private TranSketch ts_;
 
@@ -131,7 +133,7 @@ public class TranSketchGUI extends JFrame {
     docFrames_.remove(frame);
 
     if(docFrames_.size() == 0) {
-      //System.out.println("last frame closed");
+      //logger.debug("last frame closed");
       //cfm_.editorChanged(activeFrame_.getEditor(), null);
       cfm_.documentChanged(activeFrame_.getDocument(), null);
       activeFrame_ = null;
@@ -168,7 +170,7 @@ public class TranSketchGUI extends JFrame {
   }*/
 
   public void msg(String msg) {
-    System.out.println("MSG: "+msg);
+    logger.debug("MSG: "+msg);
     cfm_.getOutputFrame().msg(msg);
   }
 
@@ -182,7 +184,7 @@ public class TranSketchGUI extends JFrame {
 
   public void updateUndoRedo(Editor ed) {
     //Editor ed = ts_.getActiveEditor();
-    //System.out.println("uUR = "+ed);
+    //logger.debug("uUR = "+ed);
     boolean undoExists = (ed != null) ? ed.getHistory().undoActionExists() : false;
     String undoText = "Undo " + (undoExists ? ed.getHistory().undoActionName() : "");
     menuBar_.getUndoItem().setEnabled(undoExists);

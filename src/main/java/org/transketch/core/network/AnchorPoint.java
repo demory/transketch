@@ -24,22 +24,21 @@
 
 package org.transketch.core.network;
 
-import org.transketch.core.network.corridor.Corridor;
+
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import org.apache.log4j.Logger;
 import org.transketch.core.network.Bundler.Bundle;
+import org.transketch.core.network.corridor.Corridor;
 
 /**
  *
  * @author demory
  */
 public class AnchorPoint extends AbstractAnchorPoint {
+  private final static Logger logger = Logger.getLogger(AnchorPoint.class);
 
   private int id_;
   private Point2D.Double point_;
@@ -114,7 +113,7 @@ public class AnchorPoint extends AbstractAnchorPoint {
   }
 
   public void applyBundleOffset(double dx, double dy) {
-    //System.out.println("aBO "+id_+": "+dx+","+dy);
+    //logger.debug("aBO "+id_+": "+dx+","+dy);
     bundleOffset_.setLocation(bundleOffset_.x + dx, bundleOffset_.y + dy);
   }
   

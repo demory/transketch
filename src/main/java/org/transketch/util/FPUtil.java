@@ -24,7 +24,6 @@ package org.transketch.util;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 import java.awt.Dimension;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.File;
@@ -41,6 +40,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.log4j.Logger;
 //import org.fpdev.core.basenet.BNode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -53,7 +53,8 @@ import org.w3c.dom.NodeList;
  * @author demory
  */
 public abstract class FPUtil {
-
+  private final static Logger logger = Logger.getLogger(FPUtil.class);
+  
   public static final int AM = 1;
   public static final int PM = 2;
 
@@ -80,7 +81,7 @@ public abstract class FPUtil {
     double lineMag = FPUtil.magnitude(x1, y1, x2, y2);
     double u = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / (lineMag * lineMag);
     if (u > Double.MIN_VALUE && u <= 1) {
-      //System.out.println(" u="+u);
+      //logger.debug(" u="+u);
       double ix = x1 + u * (x2 - x1);
       double iy = y1 + u * (y2 - y1);
       return FPUtil.magnitude(ix, iy, x, y);
@@ -147,7 +148,7 @@ public abstract class FPUtil {
     double numx = (x1*y2-y1*x2)*(x3-x4) - (x1-x2)*(x3*y4-y3*x4);
     double numy = (x1*y2-y1*x2)*(y3-y4) - (y1-y2)*(x3*y4-y3*x4);
 
-    //System.out.println("  numx="+numx + " numy="+numy+" denom="+denom);
+    //logger.debug("  numx="+numx + " numy="+numy+" denom="+denom);
     if(denom == 0) return null; // lines do not intersect
     return new Point2D.Double(numx/denom, numy/denom);
 
@@ -201,7 +202,7 @@ public abstract class FPUtil {
 
   public static void setPreferredColumnWidths(JTable table, double[] percentages) {
     if(table.getColumnCount() != percentages.length) {
-      System.out.println("Error: column count mismatch in FPUtil::setPreferredColumnWidths()");
+      logger.error("Error: column count mismatch in FPUtil::setPreferredColumnWidths()");
       return;
     }
 
@@ -215,7 +216,7 @@ public abstract class FPUtil {
     for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
       TableColumn column = table.getColumnModel().getColumn(i);
       int w = (int) (tableDim.width * (percentages[i] / total));
-      //System.out.println("w=" + w);
+      //logger.debug("w=" + w);
       column.setPreferredWidth(w);
     }
   }
@@ -437,7 +438,7 @@ public abstract class FPUtil {
       NodeList docNodes = doc.getChildNodes();
       Node thisNode = docNodes.item(0);
       if (docNodes.getLength() != 1 && !thisNode.getNodeName().equals("properties")) {
-        System.out.println("Not a valid properties file");
+        logger.error("Not a valid properties file");
         return;
       }
 
@@ -447,12 +448,12 @@ public abstract class FPUtil {
         Node propNode = propNodes.item(i);
         if (propNode.getNodeName().compareTo("property") == 0) {
           String name = propNode.getAttributes().getNamedItem("name").getNodeValue();
-          System.out.println("prop name=" + name + " val=" + propNode.getTextContent());
+          logger.debug("prop name=" + name + " val=" + propNode.getTextContent());
           props.setProperty(name, propNode.getTextContent());
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("readPropertiesFile() error", e);
     }
   }
 
@@ -480,7 +481,7 @@ public abstract class FPUtil {
       //close the input stream 
       fis.close();
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error("zipFile() error", ex);
     }
   }
 
@@ -523,7 +524,7 @@ public abstract class FPUtil {
         fis.close();
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error("zipDir() error", ex);
     }
   }
 

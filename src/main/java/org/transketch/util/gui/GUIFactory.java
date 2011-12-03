@@ -15,12 +15,14 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.border.*;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author demory
  */
 public class GUIFactory {
+  private final static Logger logger = Logger.getLogger(GUIFactory.class);
   
   public static final Font MAIN_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 11); 
   
@@ -93,7 +95,7 @@ public class GUIFactory {
         for(Component c : box.getParent().getComponents()) {
           if(c != box) pw -= c.getSize().width;
         }
-        System.out.println("cb resizing to "+pw);
+        logger.debug("cb resizing to "+pw);
         box.setMaximumSize(new Dimension(pw, box.getHeight()));
       }
     });*/
@@ -101,13 +103,13 @@ public class GUIFactory {
 
     /*box.getParent().addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
-        //System.out.println(e.getComponent().getClass().getName() + " resized to "+box.getSize());
-        //System.out.println("parent size="+box.getParent().getSize());
+        //logger.debug(e.getComponent().getClass().getName() + " resized to "+box.getSize());
+        //logger.debug("parent size="+box.getParent().getSize());
         int pw = box.getParent().getSize().width;
         for(Component c : box.getParent().getComponents()) {
           if(c != box) pw -= c.getSize().width;
         }
-        System.out.println("pw="+pw);
+        logger.debug("pw="+pw);
         box.setMaximumSize(new Dimension(pw, box.getHeight()));
       }
     });
@@ -138,7 +140,7 @@ public class GUIFactory {
           if(!stateCmb) cb.firePopupMenuCanceled();
           //Reset JComboBox and state
           stateCmb = false;
-          System.out.println("setting cb width: "+width);
+          logger.debug("setting cb width: "+width);
           cb.setSize(width, cb.getHeight());
 
         }

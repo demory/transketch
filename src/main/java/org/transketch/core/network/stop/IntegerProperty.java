@@ -52,7 +52,6 @@ public class IntegerProperty extends RendererProperty<Integer> {
     widget.add(spinner);
     spinner.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        //System.out.println("new val = "+ ((Integer) spinner.getValue()));
         value_ = (Integer) spinner.getValue();
       }
     });

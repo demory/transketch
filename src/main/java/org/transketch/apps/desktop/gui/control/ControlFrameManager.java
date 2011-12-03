@@ -28,9 +28,9 @@ import java.awt.Point;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSDocument;
 import org.transketch.apps.desktop.command.TSInvoker;
-import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.gui.TranSketchGUI;
 
 /**
@@ -38,6 +38,7 @@ import org.transketch.apps.desktop.gui.TranSketchGUI;
  * @author demory
  */
 public class ControlFrameManager {
+  private final static Logger logger = Logger.getLogger(ControlFrameManager.class);
 
   private TranSketchGUI gui_;
 
@@ -63,7 +64,7 @@ public class ControlFrameManager {
     if(placementPoint_ == null)
       placementPoint_ = new Point(gui_.getDesktop().getWidth() - frame.getWidth(), 0);
 
-    System.out.println("dh="+(gui_.getDesktop().getHeight() - placementPoint_.y));
+    logger.debug("dh="+(gui_.getDesktop().getHeight() - placementPoint_.y));
     if(gui_.getDesktop().getHeight() - placementPoint_.y < frame.getHeight())
       placementPoint_.move(placementPoint_.x-frame.getWidth(), 0);
     
@@ -71,7 +72,7 @@ public class ControlFrameManager {
 
     placementPoint_.translate(0, frame.getHeight());
 
-    System.out.println("returning "+toReturn);
+    logger.debug("returning "+toReturn);
     return toReturn;
   }
 

@@ -44,7 +44,6 @@ public class SetStopStyleCommand extends EditorBasedCommand implements TSAction 
     super(ed);
     stop_ = stop;
     newStyle_ = style;
-    System.out.println("line = "+stop);
     oldStyle_ = stop.getStyle();
   }
 

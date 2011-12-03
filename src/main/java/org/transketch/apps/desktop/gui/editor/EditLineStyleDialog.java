@@ -62,6 +62,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.gui.editor.map.EditorCanvas;
 import org.transketch.core.network.LineStyle;
 import org.transketch.core.network.LineStyleView;
@@ -76,6 +77,7 @@ import org.transketch.util.gui.GUIFactory;
  * @author demory
  */
 public class EditLineStyleDialog extends JDialog implements ActionListener, LineStyleView, RRSListener {
+  private final static Logger logger = Logger.getLogger(EditLineStyleDialog.class);  
 
   private JPanel layersListPanel_, colorSwatch_;
   private LineStylePreviewPanel previewPanel_;
@@ -366,7 +368,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
     layerRows_ = new LinkedList<LayerRow>();
     int rank = 0;
     for(LineStyleLayer layer : activeSub_.getLayers()) {
-      //System.out.println("adding row");
+      //logger.debug("adding row");
       LayerRow row = null;
       if(layer.getColorMode() == LineStyleLayer.ColorMode.HARD_CODED)
         row = new LayerRow(++rank, layer.getColor(), layer.getWidth());
@@ -403,9 +405,9 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
     List<LineSubStyle> subs = new ArrayList<LineSubStyle>(subStyles_.values());
     List<Double> breakpoints = new ArrayList(subStyles_.keySet()); //new ArrayList<Double>();
     breakpoints.remove(0); // remove the the first (key=0) breakpoint
-    System.out.println("breakpoints: "+breakpoints);
+    logger.debug("breakpoints: "+breakpoints);
     for(LineSubStyle sub : subs) {
-      System.out.println(" sub: "+sub.getLayers().size());
+      logger.debug(" sub: "+sub.getLayers().size());
     }
     return new LineStyle.LineStyleAttributes(getName(), subs, breakpoints);
   }
@@ -424,7 +426,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
   }
 
   private void envelopeChanged() {
-    System.out.println("envelope changed!");
+    logger.debug("envelope changed!");
     if((Integer) envelopeSpinner_.getValue() < getMaxLayerWidth()) {
       envelopeSpinner_.setValue(getMaxLayerWidth());
     }
@@ -453,7 +455,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
 
     for(LayerRow row : layerRows_) row.rank_++;
     layerRows_.add(new LayerRow(1, Color.BLACK, 2));
-    System.out.println("new layer");
+    logger.debug("new layer");
     refreshLayers();
     previewPanel_.repaint();
   }
@@ -508,7 +510,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
     setPropertiesEnabled(true);
     if(selectedRow_.colorMode_ == LineStyleLayer.ColorMode.HARD_CODED) {
       colorHardCodedRBtn_.setSelected(true);
-      System.out.println("row.color_="+row.color_.toString());
+      logger.debug("row.color_="+row.color_.toString());
       colorSwatch_.setBackground(row.color_);
       colorKeySpecifiedRBtn_.setText("Specified by Key");
     }
@@ -530,7 +532,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
   }
 
   public void breakpointRemoved(double reso) {
-    System.out.println("rm bp: "+reso);
+    logger.debug("rm bp: "+reso);
     List<Double> bpResos = new ArrayList<Double>(subStyles_.keySet());
     //bpResos.add(Double.MAX_VALUE);
     int i;
@@ -543,7 +545,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
     String right = df.format(bpResos.get(i)) + " to " + ((i+1 == bpResos.size()) ? new DecimalFormatSymbols().getInfinity() : df.format(bpResos.get(i+1)));
     
     int n = JOptionPane.showOptionDialog(null, "Which range's SubStyle should be kept?", "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, new String[] {left, right}, null);
-    System.out.println("n="+n+" removing "+bpResos.get(i-n));
+    logger.debug("n="+n+" removing "+bpResos.get(i-n));
     subStyles_.remove(bpResos.get(i-n));
 
     bpResos = new ArrayList<Double>(subStyles_.keySet());
@@ -576,7 +578,7 @@ public class EditLineStyleDialog extends JDialog implements ActionListener, Line
       this(rank, width);
       colorMode_ = LineStyleLayer.ColorMode.HARD_CODED;
       color_ = color;
-      System.out.println("set color = "+color_.toString());
+      logger.debug("set color = "+color_.toString());
     }
 
     public LayerRow(int rank, String colorKey, int width) {
