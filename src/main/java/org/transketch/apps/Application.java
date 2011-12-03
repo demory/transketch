@@ -104,7 +104,7 @@ public class Application {
       toExclude.add(SysProps.DERBY_HOME);
 
       String filename = sysProps_.getProperty(SysProps.FP_HOME) + "conf" + File.separator + sysProps_.getProperty(SysProps.APP_MODE) + ".xml";
-      if(!new File(filename).exists()) return;
+      //if(!new File(filename).exists()) return;
       FileWriter writer = new FileWriter(filename);
 
       writer.write("<?xml version=\"1.0\"?>\n");
