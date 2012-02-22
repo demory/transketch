@@ -21,6 +21,7 @@ public class SegmentComponent extends CorridorComponent {
     segment_ = new Line2D.Double(from, to);
   }
   
+  @Override
   public Type getType() {
     return Type.SEGMENT;
   }
@@ -29,6 +30,7 @@ public class SegmentComponent extends CorridorComponent {
     return segment_;
   }
 
+  @Override
   public Shape getShape() {
     return getSegment();
   }
@@ -41,10 +43,12 @@ public class SegmentComponent extends CorridorComponent {
     return segment_.getP2();
   }
 
+  @Override
   public Point2D intersect(CorridorComponent comp) {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
+  @Override
   public Shape truncateTo(CorridorComponent comp) {
     if(comp.getType() == Type.SEGMENT) {
       Point2D isect = ComponentIntersector.segmentSegmentIntersection(this, (SegmentComponent) comp);
@@ -53,6 +57,7 @@ public class SegmentComponent extends CorridorComponent {
     return getSegment();
   }
 
+  @Override
   public Shape truncateFrom(CorridorComponent comp) {
     if(comp.getType() == Type.SEGMENT) {
       Point2D isect = ComponentIntersector.segmentSegmentIntersection(this, (SegmentComponent) comp);

@@ -21,10 +21,9 @@ public class ComponentIntersector {
     double x4 = seg2.getTo().getX(), y4 = seg2.getTo().getY();
 
     double denom  = (y4-y3) * (x2-x1) - (x4-x3) * (y2-y1);
+    if(Math.abs(denom) <= .00001) return null;
     double ua = ((x4-x3) * (y1-y3) - (y4-y3) * (x1-x3)) / denom;
     double ub = ((x2-x1) * (y1-y3) - (y2-y1) * (x1-x3)) / denom;
-
-    if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null;
 
     return new Point2D.Double(x1 + ua * (x2 - x1),  y1 + ua * (y2 - y1));
   }
