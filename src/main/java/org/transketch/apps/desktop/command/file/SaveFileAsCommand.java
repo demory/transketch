@@ -49,6 +49,7 @@ public class SaveFileAsCommand extends EditorBasedCommand {
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File file = chooser.getSelectedFile();
       ed_.getDocument().writeXMLFile(file);
+      ed_.getHistory().fileSaved();
       ts.getRecentFiles().addFile(file.getPath());
       ts.getGUI().getActiveDocumentFrame().setTitle(file.getName());
       return true;

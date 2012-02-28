@@ -44,6 +44,8 @@ public class SaveFileCommand extends EditorBasedCommand {
       return false;
     }
     ed_.getDocument().writeXMLFile();
+    ed_.getHistory().fileSaved();
+    
     return true;
   }
 
