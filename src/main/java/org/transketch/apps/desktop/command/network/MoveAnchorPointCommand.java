@@ -48,7 +48,7 @@ public class MoveAnchorPointCommand extends EditorBasedCommand implements TSActi
     from_ = from;
     to_ = to;
   }
-
+  
   public boolean doThis(TranSketch ts) {
     anchor_.moveTo(to_.getX(), to_.getY());
     for(Corridor corr : ed_.getDocument().getNetwork().incidentCorridors(anchor_))

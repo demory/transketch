@@ -24,18 +24,18 @@
 
 package org.transketch.apps.desktop.gui.editor;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import org.transketch.apps.desktop.Editor.Property;
 import org.transketch.apps.desktop.command.TSInvoker;
@@ -300,20 +300,6 @@ public class EditorToolbar extends JPanel { //JToolBar {
     }
 
   }
-
-  /*private class SelMenuItem extends JCheckBoxMenuItem {
-    public SelMenuItem(String title, Drawable.Type type, SelectableMenu menu) {
-      super(title, true);
-      menu.add(this);
-
-      addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          pane_.getCanvas().setHoverableTypes(getSelectableTypes());
-        }
-      });
-    }
-
-  }*/
   
   private class Action {
     ActionType type_;

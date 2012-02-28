@@ -148,6 +148,12 @@ public class TSNetwork {
 
     return best;
   }
+  
+  public boolean pointExistsAt(double x, double y) {
+    for(AnchorPoint pt : getAnchorPoints())
+      if(pt.getX() == x && pt.getY() == y) return true;
+    return false;
+  }
 
   public void realignCorridorFrom(Corridor corr, AnchorPoint newFrom) {
     AnchorPoint toPt = corr.tPoint();

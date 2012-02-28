@@ -261,10 +261,15 @@ public class EditorCanvas extends Viewport {
         repaint();
         break;*/
       case DRAG_POINT:
-        if(ed_.getBoolProperty(Editor.Property.SNAP_TO_GRID)) { //gui_.getControlPanel().getSnapToGrid()) {
-          draggingPoint_.moveTo((double) Math.round(coords_.xToWorld(x)),
-                                (double) Math.round(coords_.yToWorld(y)));
+        double wx = coords_.xToWorld(x), wy = coords_.yToWorld(y);
+        if(ed_.getBoolProperty(Editor.Property.SNAP_TO_GRID)) {
+          wx = Math.round(wx);
+          wy = Math.round(wy);
         }
+        if(doc_.getNetwork().pointExistsAt(wx, wy)) break;
+        
+        if(ed_.getBoolProperty(Editor.Property.SNAP_TO_GRID)) 
+          draggingPoint_.moveTo(wx, wy);
         else
           draggingPoint_.moveBy(-dx, -dy);
         
