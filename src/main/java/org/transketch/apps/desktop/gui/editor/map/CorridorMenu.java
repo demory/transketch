@@ -35,7 +35,7 @@ import org.transketch.apps.desktop.command.network.DeleteCorridorCommand;
 import org.transketch.apps.desktop.command.network.FlipCorridorCommand;
 import org.transketch.apps.desktop.command.network.SetCorridorElbowAngleCommand;
 import org.transketch.apps.desktop.command.network.SplitCorridorCommand;
-import org.transketch.apps.desktop.gui.editor.EditorToolbar.Action;
+import org.transketch.apps.desktop.gui.editor.EditorToolbar.ActionType;
 import org.transketch.core.network.corridor.Corridor;
 import org.transketch.util.FPUtil;
 
@@ -84,7 +84,7 @@ public class CorridorMenu extends MapContextMenu {
     new Item("Create New Line").addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         if(invoker_.doCommand(new CreateLineCommand(ed_, corridor_))) {
-          ed_.getPane().getToolbar().selectAction(Action.MODIFY_LINE);
+          ed_.getPane().getToolbar().selectAction(ActionType.MODIFY_LINE);
         }
       }
     });

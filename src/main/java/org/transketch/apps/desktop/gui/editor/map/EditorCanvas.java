@@ -45,14 +45,7 @@ import org.apache.log4j.Logger;
 import org.transketch.util.viewport.MapCoordinates;
 import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.Editor;
-import org.transketch.apps.desktop.command.network.CreateAnchorPointCommand;
-import org.transketch.apps.desktop.command.network.CreateCorridorCommand;
-import org.transketch.apps.desktop.command.network.DeleteAnchorPointCommand;
-import org.transketch.apps.desktop.command.network.DeleteCorridorCommand;
-import org.transketch.apps.desktop.command.network.AddCorridorsToLineCommand;
-import org.transketch.apps.desktop.command.network.MergeAnchorPointCommand;
-import org.transketch.apps.desktop.command.network.MoveAnchorPointCommand;
-import org.transketch.apps.desktop.command.network.RemoveCorridorsFromLineCommand;
+import org.transketch.apps.desktop.command.network.*;
 import org.transketch.apps.desktop.gui.editor.EditorToolbar;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.Bundler;
@@ -124,7 +117,7 @@ public class EditorCanvas extends Viewport {
         oldDragPtLoc_ = new Point2D.Double(pt.getX(), pt.getY());
       }
     }
-    ed_.getPane().getToolbar().clearMenu();
+    //ed_.getPane().getToolbar().clearMenu();
   }
 
   @Override
@@ -166,11 +159,11 @@ public class EditorCanvas extends Viewport {
     }
 
 
-    EditorToolbar.Action toolbarAction = ed_.getPane().getToolbar().getSelectedAction();
+    EditorToolbar.ActionType toolbarAction = ed_.getPane().getToolbar().getSelectedAction();
 
     // UPDATE PREVIEW ANCHOR (IF APPLICABLE)
 
-    if(toolbarAction == EditorToolbar.Action.CREATE_ANCHOR_POINT || toolbarAction == EditorToolbar.Action.DRAW_NETWORK) {
+    if(toolbarAction == EditorToolbar.ActionType.CREATE_ANCHOR_POINT || toolbarAction == EditorToolbar.ActionType.DRAW_NETWORK) {
       if(hoverItem != null && hoverItem.getDrawableType() == Drawable.Type.ANCHOR_POINT) {
         previewAnchor_ = null;
       }
@@ -183,7 +176,7 @@ public class EditorCanvas extends Viewport {
 
     // UPDATE PREVIEW CORRIDOR (IF APPLICABLE)
 
-    if((toolbarAction == EditorToolbar.Action.CREATE_CORRIDOR || toolbarAction == EditorToolbar.Action.DRAW_NETWORK)
+    if((toolbarAction == EditorToolbar.ActionType.CREATE_CORRIDOR || toolbarAction == EditorToolbar.ActionType.DRAW_NETWORK)
             && fromAnchor_ != null) {
 
       if(hoverItem != null && hoverItem.getDrawableType() == Drawable.Type.ANCHOR_POINT) {
@@ -197,7 +190,7 @@ public class EditorCanvas extends Viewport {
         }
       }
       else {
-        Point2D.Double mousePoint = getWorldCoords(x, y, toolbarAction == EditorToolbar.Action.DRAW_NETWORK);
+        Point2D.Double mousePoint = getWorldCoords(x, y, toolbarAction == EditorToolbar.ActionType.DRAW_NETWORK);
         if(previewCorr_ == null)
           previewCorr_ = new PreviewCorridor(fromAnchor_.getPoint2D(), mousePoint, Color.gray);
         else {
@@ -218,7 +211,7 @@ public class EditorCanvas extends Viewport {
 
     // UPDATE LINE PREVIEW (IF APPLICABLE)
 
-    if(toolbarAction == EditorToolbar.Action.MODIFY_LINE && ed_.getSelectedLine() != null) {
+    if(toolbarAction == EditorToolbar.ActionType.MODIFY_LINE && ed_.getSelectedLine() != null) {
       Line line = ed_.getSelectedLine();
       if(hoverItem_ != null && hoverItem_.getDrawableType() == Drawable.Type.CORRIDOR) {
         Corridor corr = (Corridor) hoverItem_;
@@ -310,7 +303,7 @@ public class EditorCanvas extends Viewport {
               break;
             case KeyEvent.VK_ESCAPE:
               cancelActiveAction();
-              if(ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.Action.MODIFY_LINE) {
+              if(ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.ActionType.MODIFY_LINE) {
                 ed_.setSelectedLine(null);
                 setHoverableTypes(new Drawable.Type[] { Drawable.Type.LINE });
               }
@@ -489,6 +482,8 @@ public class EditorCanvas extends Viewport {
         break;
 
       case SPLIT_CORRIDOR:
+        wXY = getWorldCoords(mx, my, false);
+        invoker_.doCommand(new SplitCorridorCommand(ed_, wXY.getX(), wXY.getY()));
         //ts_.getNetworkOps().splitCorridor(coords_.xToWorld(mx), coords_.yToWorld(my));
         //repaint();
         break;
@@ -526,7 +521,7 @@ public class EditorCanvas extends Viewport {
 
   @Override
   protected void rightClick(int mx, int my, int numClicks, boolean shift, boolean control) {
-    if(ed_.getPane().getToolbar().getSelectedAction() != EditorToolbar.Action.SELECT) return;
+    if(ed_.getPane().getToolbar().getSelectedAction() != EditorToolbar.ActionType.SELECT) return;
 
     Drawable clickedItem = ed_.getDrawableAtXY(coords_.xToWorld(mx), coords_.yToWorld(my), hoverableTypes_);
     if(clickedItem == null) return;
@@ -600,7 +595,7 @@ public class EditorCanvas extends Viewport {
   }
 
   public void mergeStarted(AnchorPoint pt) {
-    ed_.getPane().getToolbar().selectAction(EditorToolbar.Action.MERGE_ANCHOR_POINT);
+    ed_.getPane().getToolbar().selectAction(EditorToolbar.ActionType.MERGE_ANCHOR_POINT);
     fromAnchor_ = pt;
     addHighlightedItem(fromAnchor_);
     repaint();

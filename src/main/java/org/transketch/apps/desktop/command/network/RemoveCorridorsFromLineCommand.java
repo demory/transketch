@@ -56,7 +56,7 @@ public class RemoveCorridorsFromLineCommand extends EditorBasedCommand implement
     boolean success = line_.removeCorridor(corridor_);
 
     if(success) {
-      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.Action.MODIFY_LINE)
+      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.ActionType.MODIFY_LINE)
         ed_.getPane().getCanvas().startEditingLine(line_);
       ed_.getDocument().getNetwork().rebundle();
     }
@@ -68,7 +68,7 @@ public class RemoveCorridorsFromLineCommand extends EditorBasedCommand implement
     boolean success = line_.addCorridor(corridor_);
 
     if(success) {
-      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.Action.MODIFY_LINE)
+      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.ActionType.MODIFY_LINE)
         ed_.getPane().getCanvas().startEditingLine(line_);
       ed_.getDocument().getNetwork().rebundle();
     }

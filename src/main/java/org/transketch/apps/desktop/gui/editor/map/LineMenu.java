@@ -33,7 +33,7 @@ import org.transketch.apps.desktop.command.TSInvoker;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.network.SetLineLayerIndexCommand;
 import org.transketch.apps.desktop.command.linestyle.SetLineStyleColorsCommand;
-import org.transketch.apps.desktop.gui.editor.EditorToolbar.Action;
+import org.transketch.apps.desktop.gui.editor.EditorToolbar.ActionType;
 import org.transketch.core.network.Line;
 import org.transketch.util.FPUtil;
 
@@ -73,7 +73,7 @@ public class LineMenu extends MapContextMenu {
 
     new Item("Modify Line Corridors").addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        ed_.getPane().getToolbar().selectAction(Action.MODIFY_LINE);
+        ed_.getPane().getToolbar().selectAction(ActionType.MODIFY_LINE);
         ed_.getPane().getCanvas().startEditingLine(line_);
       }
     });

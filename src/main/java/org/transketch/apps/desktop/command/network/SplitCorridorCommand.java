@@ -45,24 +45,37 @@ public class SplitCorridorCommand extends EditorBasedCommand implements TSAction
 
   private Corridor initialCorr_, splitCorr1_, splitCorr2_;
   private AnchorPoint point_;
-  double x_, y_;
+  private double wx_, wy_;
 
   private CreateCorridorCommand subCorr1Cmd_, subCorr2Cmd_;
   private DeleteCorridorCommand delCorrCmd_;
   private CreateAnchorPointCommand anchorPointCmd_;
 
-  public SplitCorridorCommand(Editor ed, Corridor corr, double x, double y) {
+  public SplitCorridorCommand(Editor ed, Corridor corr, double wx, double wy) {
     super(ed);
-    logger.debug("init split "+x+","+y);
     initialCorr_ = corr;
-    x_ = x; y_ = y;
+    wx_ = wx; wy_ = wy;
   }
 
+  public SplitCorridorCommand(Editor ed, double wx, double wy) {
+    super(ed);
+    wx_ = wx; wy_ = wy;
+  }
+  
+  @Override
+  public boolean initialize() {
+    if(initialCorr_ != null) return true;
+    initialCorr_ = ed_.getDocument().getNetwork().getCorridorAtXY(wx_, wy_,
+      ed_.getPane().getCanvas().getClickToleranceW());
+
+    return initialCorr_ != null;
+  }
+  
   public boolean doThis(TranSketch ts) {
 
     boolean result = true;
     if(anchorPointCmd_ == null) {
-      Point2D pt = initialCorr_.nearestPoint(x_, y_);
+      Point2D pt = initialCorr_.nearestPoint(wx_, wy_);
       logger.debug(pt);
       anchorPointCmd_ = new CreateAnchorPointCommand(ed_, pt.getX(), pt.getY());
       // TODO: snap to grid

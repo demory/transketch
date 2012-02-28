@@ -79,7 +79,7 @@ public class EditorPane extends JPanel implements KeyListener, ResolutionListene
 
     toolbar_ = new EditorToolbar(this, invoker);
 
-    toolbar_.selectAction(EditorToolbar.Action.SELECT);
+    toolbar_.selectAction(EditorToolbar.ActionType.SELECT);
 
     //JPanel mainPanel = new JPanel(new BorderLayout());
     add(toolbar_, BorderLayout.NORTH);

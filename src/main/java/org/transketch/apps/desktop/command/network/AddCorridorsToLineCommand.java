@@ -73,7 +73,7 @@ public class AddCorridorsToLineCommand extends EditorBasedCommand implements TSA
     for(Corridor c : corridors_) success = success & line_.addCorridor(c);
 
     if(success) {
-      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.Action.MODIFY_LINE)
+      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.ActionType.MODIFY_LINE)
         ed_.getPane().getCanvas().startEditingLine(line_);
       ed_.getDocument().getNetwork().rebundle();
     }
@@ -88,7 +88,7 @@ public class AddCorridorsToLineCommand extends EditorBasedCommand implements TSA
       success = success & line_.removeCorridor(corridors_.get(i));
 
     if(success) {
-      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.Action.MODIFY_LINE)
+      if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.ActionType.MODIFY_LINE)
         ed_.getPane().getCanvas().startEditingLine(line_);
       ed_.getDocument().getNetwork().rebundle();
     }
