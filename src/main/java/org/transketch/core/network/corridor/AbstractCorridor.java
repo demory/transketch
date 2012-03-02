@@ -118,7 +118,7 @@ public abstract class AbstractCorridor implements Drawable {
   }*/
 
   public void draw(TSCanvas canvas) {
-    draw(canvas, 0, 0, new LineStyleLayer(2, Color.gray));
+    draw(canvas, 0, 0, new LineStyleLayer(2, Color.lightGray));
   }
 
   public void draw(TSCanvas canvas, int offsetFrom, int offsetTo, LineStyleLayer sstyle) { //int width, int offsetFrom, int offsetTo, Color color) {
@@ -628,6 +628,7 @@ public abstract class AbstractCorridor implements Drawable {
   }
 
   public boolean isStraight() {
+    if(thetaR_ == 0) return true;
     double tol = .001;
     if(thetaR_ != Math.PI/2 && Math.abs(Math.abs(x2()-x1()) - Math.abs(y2()-y1())) < tol) return true;
     if(Math.abs(x1()-x2()) < tol || Math.abs(y1()-y2()) < tol) return true;

@@ -48,7 +48,7 @@ public class SetCorridorElbowAngleCommand extends EditorBasedCommand implements 
 
   @Override
   public boolean initialize() {
-    return (angleR_ >= Math.PI/2 && angleR_ <= (3.0/4.0)*Math.PI);
+    return angleR_ == 0 || (angleR_ >= Math.PI/2 && angleR_ <= (3.0/4.0)*Math.PI);
   }
 
   public boolean doThis(TranSketch ts) {

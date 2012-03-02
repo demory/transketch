@@ -91,7 +91,7 @@ public class TSNetwork {
 
   public Rectangle2D.Double getBoundingBox() {
     double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
-    double maxx = Double.MIN_VALUE, maxy = Double.MIN_VALUE;
+    double maxx = -Double.MAX_VALUE, maxy = -Double.MAX_VALUE;
     for(AnchorPoint pt : points_.values()) {
       minx = Math.min(minx, pt.getX());
       miny = Math.min(miny, pt.getY());
@@ -173,6 +173,10 @@ public class TSNetwork {
 
   public Collection<Corridor> getCorridors() {
     return corridors_.values();
+  }
+  
+  public Corridor getCorridor(int id) {
+    return corridors_.get(id);
   }
 
   public Collection<Corridor> incidentCorridors(AnchorPoint point) {

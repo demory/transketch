@@ -91,9 +91,12 @@ public class MenuBar extends JMenuBar {
 
     JMenu toolsMenu = new JMenu("Tools");
     newMenuItem(toolsMenu, "Run Bundler", CommandFactory.Key.TOOLS_REBUNDLE);
+    newMenuItem(toolsMenu, "Run OTP Importer", CommandFactory.Key.TOOLS_IMPORT_OTP);
     add(toolsMenu);
 
     JMenu viewMenu = new JMenu("View");
+    newMenuItem(viewMenu, "Zoom to Extents", CommandFactory.Key.VIEW_ZOOM_TO_EXTENTS);
+    viewMenu.addSeparator();
     newEPCBMenuItem(viewMenu, "Show Anchors", Editor.Property.SHOW_ANCHORS);
     newEPCBMenuItem(viewMenu, "Show Corridors", Editor.Property.SHOW_CORRIDORS);
     newEPCBMenuItem(viewMenu, "Show Lines", Editor.Property.SHOW_LINES);

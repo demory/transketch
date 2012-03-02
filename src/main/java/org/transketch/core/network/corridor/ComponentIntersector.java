@@ -25,7 +25,13 @@ public class ComponentIntersector {
     double ua = ((x4-x3) * (y1-y3) - (y4-y3) * (x1-x3)) / denom;
     double ub = ((x2-x1) * (y1-y3) - (y2-y1) * (x1-x3)) / denom;
 
-    return new Point2D.Double(x1 + ua * (x2 - x1),  y1 + ua * (y2 - y1));
+    double x = x1 + ua * (x2 - x1), y = y1 + ua * (y2 - y1);
+    //if(Math.abs(x) > 1000 || Math.abs(y) > 1000) {
+      //System.out.println(ua + " "+ub);
+   
+    //  return null;
+    //}
+    return null;//new Point2D.Double(x, y);
   }
 
   public static Point2D arcSegmentIntersection(ArcComponent arc, SegmentComponent seg) {

@@ -399,10 +399,12 @@ public class Bundler {
     Set<Corridor> corrs = new HashSet<Corridor>(network.getCorridors());
     straightaways_ = new HashSet<Straightaway>();
     while(!corrs.isEmpty()) {
+      
       //logger.debug("corrs size="+corrs.size());
       Corridor corr = corrs.iterator().next();
       //logger.debug("considering: "+corr);
 
+      boolean debug = true;//(corr.getID() == 5565);
       /*if(corr.isVertical()) {
         //logger.debug(" vert");
       }
@@ -422,10 +424,12 @@ public class Bundler {
       corrs.remove(corr);
 
       // attempt to extend in the "from" direction:
+      Set<Corridor> visited = new HashSet<Corridor>();
+      
       Corridor next = network.getStraightExtension(corr, corr.fPoint());
       AnchorPoint curPt = corr.fPoint();
-      while(next != null) {
-        //logger.debug("  next="+corr.getID());
+      while(next != null && !visited.contains(next)) {
+        visited.add(next);
         saCorrs.add(0, next);
         corrs.remove(next);
         curPt = next.opposite(curPt);
@@ -433,9 +437,11 @@ public class Bundler {
       }
 
       //attempt to extend in the "to" direction:
+      visited = new HashSet<Corridor>();
       next = network.getStraightExtension(corr, corr.tPoint());
       curPt = corr.tPoint();
-      while(next != null) {
+      while(next != null && !visited.contains(next)) {
+        visited.add(next);
         saCorrs.add(saCorrs.size(), next);
         corrs.remove(next);
         curPt = next.opposite(curPt);
