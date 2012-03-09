@@ -28,20 +28,21 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.opentripplanner.util.PolylineEncoder;
 import org.opentripplanner.util.model.EncodedPolylineBean;
 import org.transketch.apps.desktop.Editor;
+import org.transketch.apps.desktop.TSDocument;
 import org.transketch.core.network.*;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.GeographicCorridorModel;
+import org.transketch.core.network.corridor.NetworkCorridor;
 
 /**
  *
  * @author demory
  */
 public class OTPImporter {
-  
+  private final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(OTPImporter.class);
+
   private TSNetwork network_;
   
   public OTPImporter(Editor ed) {
@@ -50,13 +51,14 @@ public class OTPImporter {
   
   public void importFromURL(URL url) {
     try {
-      URL otp = new URL("file:///home/demory/otp/temp/pdxroutes.json");
-
-      URLConnection conn = otp.openConnection();
-      new BufferedReader(new InputStreamReader(conn.getInputStream()));
+      URLConnection conn = url.openConnection();
+      BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+      runImporter(br);
+      br.close();
+       
     }
-    catch(Exception e) {
-      
+    catch(Exception ex) {
+      ex.printStackTrace();
     }
   }
   
@@ -68,22 +70,21 @@ public class OTPImporter {
       br.close();
       
     } catch (Exception ex) {
-      Logger.getLogger(OTPImporter.class.getName()).log(Level.SEVERE, null, ex);
+      ex.printStackTrace();
     }    
   }
   
   public void runImporter(BufferedReader reader) {
-    System.out.println("reading otp...");
     try {
       
       Gson gson = new Gson();
       OTPData data = gson.fromJson(reader, OTPData.class);
 
-      System.out.println("edges: "+data.edges.size());
-      System.out.println("variantNames: "+data.variantNames.size());
-      System.out.println("variantSets: "+data.variantSets.size());
-      System.out.println("variantSetsByEdge: "+data.variantSetsByEdge.size());
-      System.out.println("edgesByVariant: "+data.edgesByVariant.size());
+      logger.info("edges: n="+data.edges.size());
+      logger.info("variantNames: n="+data.variantNames.size());
+      logger.info("variantSets: n="+data.variantSets.size());
+      logger.info("variantSetsByEdge: n="+data.variantSetsByEdge.size());
+      logger.info("edgesByVariant: n="+data.edgesByVariant.size());
       
       Set<Point2D> vertices = new HashSet<Point2D>();
       
@@ -98,7 +99,9 @@ public class OTPImporter {
         vertices.add(edge.to_);                
       }
       
-      System.out.println("vertices: "+vertices.size());
+      logger.info("total unique vertices: "+vertices.size());
+      
+      // create AnchorPoints
       
       Map<Point2D, AnchorPoint> anchorLookup = new HashMap<Point2D, AnchorPoint>();
       int id = 1;
@@ -109,37 +112,46 @@ public class OTPImporter {
         totalY += pt.getY();
       }
       double meanX = totalX/vertices.size(), meanY=totalY/vertices.size();
+      int mult = 100;
       for(Point2D pt : vertices) {
-        int mult = 100;
         AnchorPoint anchor = new AnchorPoint(id++, (pt.getY()-meanY)*mult, (pt.getX()-meanX)*mult);
         network_.addAnchorPoint(anchor);
         anchorLookup.put(pt, anchor);
       }
-            
-      Map<Integer, Corridor> corridorLookup = new HashMap<Integer, Corridor>();
-      Map<String, Corridor> corrStrMap = new HashMap<String, Corridor>();
+
+      
+      // create Corridors
+      
+      Map<Integer, NetworkCorridor> corridorLookup = new HashMap<Integer, NetworkCorridor>();
+      Map<String, NetworkCorridor> corrStrMap = new HashMap<String, NetworkCorridor>();
  
       int i=0;
+      boolean collapseEdges = false;
       for(OTPEdge edge : edges) {
         AnchorPoint from = anchorLookup.get(edge.from_);
         AnchorPoint to = anchorLookup.get(edge.to_);
         
         String edgeKey = Math.min(from.getID(), to.getID())+"_"+Math.max(from.getID(), to.getID());
         
-        /*if(corrStrMap.containsKey(edgeKey)) {
+        if(collapseEdges && corrStrMap.containsKey(edgeKey)) {
           corridorLookup.put(i, corrStrMap.get(edgeKey));
           i++;
           continue;
-        }*/
-        
-
-        if(from == to) {
-          System.out.println("corridor from=to!");
-          //i++;
-          //continue;
         }
-        Corridor corr = new Corridor(i+1, from, to, false);
-        corr.setElbowAngle(0);
+
+        NetworkCorridor corr = new NetworkCorridor(i, from, to, false);
+        
+        List<Point2D> pts = new ArrayList<Point2D>();
+        if(edge.coords_.size() > 2) {
+          for(Coordinate c : edge.coords_.subList(1, edge.coords_.size()-1))
+            pts.add(new Point2D.Double((c.y-meanY)*mult, (c.x-meanX)*mult));
+        }
+        corr.setModel(new GeographicCorridorModel(corr, pts));
+        
+        /*StylizedCorridorModel scm = new StylizedCorridorModel(corr);
+        scm.setElbowAngle(0);
+        corr.setModel(scm);*/
+        
         network_.addCorridor(corr);
         corrStrMap.put(edgeKey, corr);
         corridorLookup.put(i, corr);
@@ -149,6 +161,7 @@ public class OTPImporter {
       
       
       // create initial LineStyle
+      
       LineStyle style = new LineStyle(1, "otp");
       LineSubStyle ss = new LineSubStyle();
       ss.addLayer(new LineStyleLayer(4, "color", null));
@@ -156,29 +169,38 @@ public class OTPImporter {
       style.addSubStyle(ss);
       
       // create Lines
+      
       id=0;
       i=0;
+      
+      Set<String> routeIDs = new HashSet<String>();
+      
       for(List<Integer> edgeList : data.edgesByVariant) {
         String variantName = data.variantNames.get(i);
+        String routeID = variantName.split(" ")[0];
         i++;
-        if(!variantName.startsWith("152 ")) continue;
-        System.out.println("variant: "+variantName);
-        Line line = new Line(id+1, variantName);
-        id++;
         
-        Corridor lastCorr = null;
+        // read single variant for each route
+        if(routeIDs.contains(routeID)) continue;
+        routeIDs.add(routeID);
+        
+        //logger.debug("reading variant: "+variantName);
+        
+        Line line = new Line(id++, variantName);
+        
         for(Integer edgeIndex : edgeList) {
-          Corridor corr = corridorLookup.get(edgeIndex);
+          NetworkCorridor corr = corridorLookup.get(edgeIndex);
           System.out.println(" - adding corr "+corr+" (index "+edgeIndex+")");
           if(corr == null) {
             System.out.println("    ** null corridor!");
             continue;
           }
-          if(lastCorr != null && !corr.adjacentTo(lastCorr)) {
+          if(line.size() > 0 && !corr.adjacentTo(line.endPoint()) && !corr.adjacentTo(line.startPoint())) {
             System.out.println("    ** non-adjacency!");
+            break;
           }
+          
           line.initCorridor(corr);
-          lastCorr = corr;
         }
         line.setStyle(style);
         line.setStyleColor("color", new Color((float) Math.random(), (float) Math.random(), (float) Math.random()));
@@ -192,8 +214,7 @@ public class OTPImporter {
     System.out.println("done");
   }
   
-  
-
+ 
   public class OTPData {
     List<EncodedPolylineBean> edges;
     List<String> variantNames;

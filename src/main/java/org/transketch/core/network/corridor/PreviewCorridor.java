@@ -24,7 +24,7 @@
 
 package org.transketch.core.network.corridor;
 
-import org.transketch.core.network.corridor.AbstractCorridor;
+import org.transketch.core.network.corridor.StylizedCorridorModel;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import org.transketch.apps.desktop.TSCanvas;
@@ -34,17 +34,18 @@ import org.transketch.core.network.LineStyleLayer;
  *
  * @author demory
  */
-public class PreviewCorridor extends AbstractCorridor {
+public class PreviewCorridor extends Corridor {
 
   private Point2D.Double fPoint_, tPoint_;
   private Color color_;
   private boolean reversed_ = false;
 
   public PreviewCorridor(Point2D.Double fPoint, Point2D.Double tPoint, Color color) {
+    model_ = new StylizedCorridorModel(this);
     fPoint_ = fPoint;
     tPoint_ = tPoint;
     color_ = color;
-    updateGeometry();
+    model_.updateGeometry();
   }
 
   @Override
@@ -69,20 +70,17 @@ public class PreviewCorridor extends AbstractCorridor {
 
   @Override
   public void draw(TSCanvas canvas) {
-    draw(canvas, 0, 0, new LineStyleLayer(2, color_, new float[] { 2, 2 } ));
-    /*Path2D path = getPath(0, 0, canvas.getCoordinates(), reversed_);
-    Graphics2D g2d = canvas.getGraphics2D();
-    g2d.setColor(color_);
-    g2d.setStroke(new SubStyle(2, color_, new float[] { 2, 2 } ).getStroke());
-    g2d.draw(path);*/
-
+    model_.draw(canvas, 0, 0, new LineStyleLayer(2, color_, new float[] { 2, 2 } ));
   }
+
+  @Override
+  public void drawHighlight(TSCanvas canvas, Color color) { }
 
   public void flip() {
     Point2D.Double pt = fPoint_;
     fPoint_ = tPoint_;
     tPoint_ = pt;
-    updateGeometry();
+    model_.updateGeometry();
   }
 
   public void setReversed(boolean r) {
@@ -96,4 +94,10 @@ public class PreviewCorridor extends AbstractCorridor {
   public void setTPoint(Point2D.Double tPoint) {
     tPoint_ = tPoint;
   }
+
+  @Override
+  public int getID() {
+    return -1;
+  }
+
 }

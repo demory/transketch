@@ -30,7 +30,7 @@ import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.apps.desktop.gui.editor.EditorToolbar;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 
 /**
@@ -40,11 +40,11 @@ import org.transketch.core.network.Line;
 public class AddCorridorsToLineCommand extends EditorBasedCommand implements TSAction {
 
   private Line line_;
-  private List<Corridor> corridors_;
+  private List<NetworkCorridor> corridors_;
 
   private boolean added_;
 
-  public AddCorridorsToLineCommand(Editor ed, Line line, List<Corridor> corridors) {
+  public AddCorridorsToLineCommand(Editor ed, Line line, List<NetworkCorridor> corridors) {
     super(ed);
     line_ = line;
     corridors_ = corridors;
@@ -70,7 +70,7 @@ public class AddCorridorsToLineCommand extends EditorBasedCommand implements TSA
     if(line_ == null || corridors_ == null || corridors_.size() == 0) return false;
 
     boolean success = true;
-    for(Corridor c : corridors_) success = success & line_.addCorridor(c);
+    for(NetworkCorridor c : corridors_) success = success & line_.addCorridor(c);
 
     if(success) {
       if(ed_.getSelectedLine() == line_ && ed_.getPane().getToolbar().getSelectedAction() == EditorToolbar.ActionType.MODIFY_LINE)

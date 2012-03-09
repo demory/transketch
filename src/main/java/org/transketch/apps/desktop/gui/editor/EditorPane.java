@@ -98,6 +98,7 @@ public class EditorPane extends JPanel implements KeyListener, ResolutionListene
 
   public void setStatusText(String text) {
     statusLabel_.setText(text);
+    statusLabel_.paintImmediately(statusLabel_.getBounds());
   }
 
   public void setCoords(double x, double y) {

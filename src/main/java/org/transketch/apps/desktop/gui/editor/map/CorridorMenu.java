@@ -36,7 +36,7 @@ import org.transketch.apps.desktop.command.network.FlipCorridorCommand;
 import org.transketch.apps.desktop.command.network.SetCorridorElbowAngleCommand;
 import org.transketch.apps.desktop.command.network.SplitCorridorCommand;
 import org.transketch.apps.desktop.gui.editor.EditorToolbar.ActionType;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.util.FPUtil;
 
 /**
@@ -45,7 +45,7 @@ import org.transketch.util.FPUtil;
  */
 public class CorridorMenu extends MapContextMenu {
 
-  private Corridor corridor_;
+  private NetworkCorridor corridor_;
 
   public CorridorMenu(TSInvoker invoker, Editor ed) {
     super("Corridor", invoker, ed);
@@ -104,7 +104,7 @@ public class CorridorMenu extends MapContextMenu {
     });
   }
 
-  public void setCorridor(Corridor c) {
+  public void setCorridor(NetworkCorridor c) {
     corridor_ = c;
   }
   

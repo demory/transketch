@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 
 /**
  *
@@ -44,7 +44,7 @@ public class DebugActionCommand extends EditorBasedCommand {
 
   public boolean doThis(TranSketch ts) {
     logger.debug("running debug action");
-    for(Corridor c: ed_.getDocument().getNetwork().getCorridors()) c.flip();
+    for(NetworkCorridor c: ed_.getDocument().getNetwork().getCorridors()) c.flip();
     return false;
   }
 

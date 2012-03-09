@@ -30,7 +30,7 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.core.network.AnchorPoint;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 
 /**
  *
@@ -51,16 +51,16 @@ public class MoveAnchorPointCommand extends EditorBasedCommand implements TSActi
   
   public boolean doThis(TranSketch ts) {
     anchor_.moveTo(to_.getX(), to_.getY());
-    for(Corridor corr : ed_.getDocument().getNetwork().incidentCorridors(anchor_))
-      corr.updateGeometry();
+    for(NetworkCorridor corr : ed_.getDocument().getNetwork().incidentCorridors(anchor_))
+      corr.getModel().updateGeometry();
     ed_.getDocument().getNetwork().rebundle();
     return true;
   }
 
   public boolean undoThis(TranSketch ts) {
     anchor_.moveTo(from_.getX(), from_.getY());
-    for(Corridor corr : ed_.getDocument().getNetwork().incidentCorridors(anchor_))
-      corr.updateGeometry();
+    for(NetworkCorridor corr : ed_.getDocument().getNetwork().incidentCorridors(anchor_))
+      corr.getModel().updateGeometry();
     ed_.getDocument().getNetwork().rebundle();
     return true;
   }

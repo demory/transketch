@@ -24,7 +24,7 @@
 
 package org.transketch.core.network;
 
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class Bundler {
       if(!line.isBundled()) continue;
       
       AnchorPoint from = line.startPoint(), to;
-      for(Corridor c : line.getCorridors()) {
+      for(NetworkCorridor c : line.getCorridors()) {
         to = (from != c.fPoint()) ? c.fPoint() : c.tPoint();
         
         int theta;
@@ -89,9 +89,9 @@ public class Bundler {
         //logger.debug("from "+from.getID()+" to "+to.getID());
 
         // handle segment in the "forward" direction (starting with "from" point)
-        if(c.isStraight()) theta = (int) Math.toDegrees(FPUtil.getTheta(to.getX()-from.getX(), to.getY()-from.getY()));
+        if(c.getModel().isStraight()) theta = (int) Math.toDegrees(FPUtil.getTheta(to.getX()-from.getX(), to.getY()-from.getY()));
         else {
-          Point2D.Double e = c.getElbow();
+          Point2D.Double e = c.getModel().getNextInternalFrom();
           theta = (int) Math.toDegrees(FPUtil.getTheta(e.x - from.getX(), e.y - from.getY()));
         }
         //logger.debug("fw theta = "+theta);
@@ -101,9 +101,9 @@ public class Bundler {
         bundle.addLine(new LineInfo(line, LineInfo.Direction.FORWARD, c));
 
         // handle segment in the "backward" direction (starting with "to" point)
-        if(c.isStraight()) theta = (int) Math.toDegrees(FPUtil.getTheta(from.getX()-to.getX(), from.getY()-to.getY()));
+        if(c.getModel().isStraight()) theta = (int) Math.toDegrees(FPUtil.getTheta(from.getX()-to.getX(), from.getY()-to.getY()));
         else {
-          Point2D.Double e = c.getElbow();
+          Point2D.Double e = c.getModel().getNextInternalTo();
           theta = (int) Math.toDegrees(FPUtil.getTheta(e.x - to.getX(), e.y - to.getY()));
         }
         //logger.debug("bw theta = "+theta);
@@ -184,11 +184,11 @@ public class Bundler {
     //logger.debug("opp1="+opp1+", opp2="+opp2);
 
 
-    Corridor c1 = line1.corr_;
-    Corridor c2 = line2.corr_;
+    NetworkCorridor c1 = line1.corr_;
+    NetworkCorridor c2 = line2.corr_;
 
-    Corridor adj1 = line1.line_.adjacent(line1.corr_, anchor);
-    Corridor adj2 = line2.line_.adjacent(line2.corr_, anchor);
+    NetworkCorridor adj1 = line1.line_.adjacent(line1.corr_, anchor);
+    NetworkCorridor adj2 = line2.line_.adjacent(line2.corr_, anchor);
     //logger.debug("adj1="+adj1+", adj2="+adj2);
 
     // try comparing opposite points first
@@ -196,12 +196,13 @@ public class Bundler {
       
       Point2D.Double pt = null;
 
-      if(line1.corr_.isStraight() && !line2.corr_.isStraight())
-        pt = line2.corr_.getElbow();
-      else if(!line1.corr_.isStraight() && line2.corr_.isStraight())
-        pt = line1.corr_.getElbow();
-      else if(!line1.corr_.isStraight() && !line2.corr_.isStraight()) {
-        Point2D.Double e1 = line1.corr_.getElbow(), e2 = line2.corr_.getElbow();
+      if(line1.corr_.getModel().isStraight() && !line2.corr_.getModel().isStraight())
+        pt = line2.corr_.getNextInternal(anchor); //line2.corr_.getElbow();
+      else if(!line1.corr_.getModel().isStraight() && line2.corr_.getModel().isStraight())
+        pt = line1.corr_.getNextInternal(anchor); //line1.corr_.getElbow();
+      else if(!line1.corr_.getModel().isStraight() && !line2.corr_.getModel().isStraight()) {
+        Point2D.Double e1 = line1.corr_.getNextInternal(anchor),
+                e2 = line2.corr_.getNextInternal(anchor);
         double dist1 = FPUtil.magnitude(anchor.getX(), anchor.getY(), e1.x, e1.y);
         double dist2 = FPUtil.magnitude(anchor.getX(), anchor.getY(), e2.x, e2.y);
         if(dist1 < dist2) pt = e1;
@@ -255,13 +256,13 @@ public class Bundler {
     // if comparing opposite points is unhelpful, look at adjacent corridors on other side of root point
     else if(adj1 != null && adj2 != null && adj1 != adj2) {
 
-      Point2D.Double pt1 = adj1.isStraight() ?
+      Point2D.Double pt1 = adj1.getModel().isStraight() ?
         adj1.opposite(anchor).getPoint2D() :
-        adj1.getElbow();
+        adj1.getNextInternal(anchor);
 
-      Point2D.Double pt2 = adj2.isStraight() ?
+      Point2D.Double pt2 = adj2.getModel().isStraight() ?
         adj2.opposite(anchor).getPoint2D() :
-        adj2.getElbow();
+        adj2.getNextInternal(anchor);
 
       int theta1 = (int) Math.toDegrees(FPUtil.getTheta(pt1.x - anchor.getX(), pt1.y - anchor.getY()));
       int theta2 = (int) Math.toDegrees(FPUtil.getTheta(pt2.x - anchor.getX(), pt2.y - anchor.getY()));
@@ -320,12 +321,12 @@ public class Bundler {
       //int offset = -((b.size()-1)*10)/2;
       for(LineInfo li : bundledLines) {
         //offset += li.line_.getStyle().getActiveSubStyle().getMaxLayerWidth()/2;
-        offset += li.line_.getStyle().getActiveSubStyle().getEnvelope()/2;
+        offset += (double) li.line_.getStyle().getActiveSubStyle().getEnvelope()/2.0;
 
         assignOffset(li.line_, li.corr_, b.anchor_, b.theta_, offset);
         //extendOffset(li.line_, li.corr_, b.anchor_, b.theta_, offset);
 
-        Corridor oppCorr = li.line_.adjacent(li.corr_, b.anchor_);
+        NetworkCorridor oppCorr = li.line_.adjacent(li.corr_, b.anchor_);
         
         if(oppCorr != null && Math.abs(oppCorr.getAngle(b.anchor_)-b.theta_) == 180) {
 
@@ -334,14 +335,14 @@ public class Bundler {
         }
 
 
-        offset += li.line_.getStyle().getActiveSubStyle().getEnvelope()/2; // getMaxLayerWidth()/2; //10;
+        offset += (double) li.line_.getStyle().getActiveSubStyle().getEnvelope()/2.0; // getMaxLayerWidth()/2; //10;
       }
 
       sortedBundles.remove(b);
     }
   }
 
-  private void assignOffset(Line line, Corridor corr, AnchorPoint anchor, int theta, int offset) {
+  private void assignOffset(Line line, NetworkCorridor corr, AnchorPoint anchor, int theta, int offset) {
     String str = line.getID()+"_"+anchor.getID()+"_"+theta;
     if(assignedOffsets_.contains(str)) return;
    
@@ -396,12 +397,12 @@ public class Bundler {
   
   
   public void constructStraightaways(TSNetwork network) {
-    Set<Corridor> corrs = new HashSet<Corridor>(network.getCorridors());
+    Set<NetworkCorridor> corrs = new HashSet<NetworkCorridor>(network.getCorridors());
     straightaways_ = new HashSet<Straightaway>();
     while(!corrs.isEmpty()) {
       
       //logger.debug("corrs size="+corrs.size());
-      Corridor corr = corrs.iterator().next();
+      NetworkCorridor corr = corrs.iterator().next();
       //logger.debug("considering: "+corr);
 
       boolean debug = true;//(corr.getID() == 5565);
@@ -411,7 +412,7 @@ public class Bundler {
       else if(corr.isHorizontal()) {
         //logger.debug(" horiz");
       }*/
-      if(corr.isStraight()) {
+      if(corr.getModel().isStraight()) {
 
       }
       else {
@@ -419,14 +420,14 @@ public class Bundler {
         continue;
       }
 
-      List<Corridor> saCorrs = new ArrayList<Corridor>();
+      List<NetworkCorridor> saCorrs = new ArrayList<NetworkCorridor>();
       saCorrs.add(corr);
       corrs.remove(corr);
 
       // attempt to extend in the "from" direction:
-      Set<Corridor> visited = new HashSet<Corridor>();
+      Set<NetworkCorridor> visited = new HashSet<NetworkCorridor>();
       
-      Corridor next = network.getStraightExtension(corr, corr.fPoint());
+      NetworkCorridor next = network.getStraightExtension(corr, corr.fPoint());
       AnchorPoint curPt = corr.fPoint();
       while(next != null && !visited.contains(next)) {
         visited.add(next);
@@ -437,7 +438,7 @@ public class Bundler {
       }
 
       //attempt to extend in the "to" direction:
-      visited = new HashSet<Corridor>();
+      visited = new HashSet<NetworkCorridor>();
       next = network.getStraightExtension(corr, corr.tPoint());
       curPt = corr.tPoint();
       while(next != null && !visited.contains(next)) {
@@ -460,7 +461,7 @@ public class Bundler {
   public void processStraightaways(TSNetwork network) {
     for(Straightaway sa : straightaways_) {
       boolean needsAttention = false;
-      for(Corridor c : sa.corridors_) {
+      for(NetworkCorridor c : sa.corridors_) {
         for(Line l : c.getLines()) {
           Line.CorridorInfo ci = l.getCorridorInfo(c);
           if(ci.offsetFrom_ != ci.offsetTo_)
@@ -473,13 +474,13 @@ public class Bundler {
           fixCorridor(sa.corridors_.get(0), sa.corridors_.get(0).fPoint());
         }
         else {
-          Corridor c0 = sa.corridors_.get(0), c1 = sa.corridors_.get(1);
+          NetworkCorridor c0 = sa.corridors_.get(0), c1 = sa.corridors_.get(1);
           AnchorPoint startPt = null;
           if(c1.adjacentTo(c0.tPoint())) startPt = c0.fPoint();
           if(c1.adjacentTo(c0.fPoint())) startPt = c0.tPoint();
 
           AnchorPoint pt = startPt;
-          for(Corridor c : sa.corridors_) {
+          for(NetworkCorridor c : sa.corridors_) {
             fixCorridor(c, pt);
             pt = c.opposite(pt);
           }
@@ -490,7 +491,7 @@ public class Bundler {
           if(adjustment != 0) {
             //logger.debug("  Adjusting by "+adjustment);
             pt = startPt;
-            for(Corridor c : sa.corridors_) {
+            for(NetworkCorridor c : sa.corridors_) {
               bumpPointOut(pt, c, adjustment);
               pt = c.opposite(pt);
             }
@@ -505,7 +506,7 @@ public class Bundler {
     }
   }
 
-  private void fixCorridor(Corridor c, AnchorPoint start) {
+  private void fixCorridor(NetworkCorridor c, AnchorPoint start) {
     //logger.debug(" fixing corr "+c.getID() + " from pt "+start.getID());
     Set<Double> deltas = new HashSet<Double>();
     for(Line l : c.getLines()) {
@@ -531,7 +532,7 @@ public class Bundler {
     }
   }
 
-  private void bumpPointIn(AnchorPoint pt, Corridor inCorr, double delta) {
+  private void bumpPointIn(AnchorPoint pt, NetworkCorridor inCorr, double delta) {
 
     AnchorPoint opp = inCorr.opposite(pt);
     int inAngle = (int) Math.toDegrees(FPUtil.getTheta(opp.getX()-pt.getX(), opp.getY()-pt.getY()));
@@ -543,7 +544,7 @@ public class Bundler {
     bumpBundles(pt, inBundle, outBundle, delta);
   }
 
-  private void bumpPointOut(AnchorPoint pt, Corridor outCorr, double delta) {
+  private void bumpPointOut(AnchorPoint pt, NetworkCorridor outCorr, double delta) {
 
     AnchorPoint opp = outCorr.opposite(pt);
     int outAngle = (int) Math.toDegrees(FPUtil.getTheta(opp.getX()-pt.getX(), opp.getY()-pt.getY()));
@@ -600,7 +601,7 @@ public class Bundler {
     //bumped_++;
   }
    
-  private static double[] checkPointOffsetsOut(AnchorPoint pt, Corridor out) {
+  private static double[] checkPointOffsetsOut(AnchorPoint pt, NetworkCorridor out) {
     //logger.debug("**  check pt "+pt.getID()+", out "+out.getID());
     AnchorPoint opp = out.opposite(pt);
     int outAngle = (int) Math.toDegrees(FPUtil.getTheta(opp.getX()-pt.getX(), opp.getY()-pt.getY()));
@@ -612,7 +613,7 @@ public class Bundler {
     return checkPointOffsets(pt, inBundle, outBundle);
   }
 
-  private static double[] checkPointOffsetsIn(AnchorPoint pt, Corridor in) {
+  private static double[] checkPointOffsetsIn(AnchorPoint pt, NetworkCorridor in) {
     //logger.debug("**  check pt "+pt.getID()+", out "+out.getID());
     AnchorPoint opp = in.opposite(pt);
     int inAngle = (int) Math.toDegrees(FPUtil.getTheta(opp.getX()-pt.getX(), opp.getY()-pt.getY()));
@@ -690,13 +691,13 @@ public class Bundler {
 
     Line line_;
     Direction dir_;
-    Corridor corr_;
+    NetworkCorridor corr_;
 
     /*public LineInfo(Line line, Direction dir) {
       this(line, dir, null);
     }*/
 
-    public LineInfo(Line line, Direction dir, Corridor corr) {
+    public LineInfo(Line line, Direction dir, NetworkCorridor corr) {
       line_ = line;
       dir_ = dir;
       corr_ = corr;
@@ -786,10 +787,10 @@ public class Bundler {
   }
 
   public static class Straightaway {
-    List<Corridor> corridors_;
+    List<NetworkCorridor> corridors_;
     //double angleR_;
 
-    public Straightaway(List<Corridor> corrs) { //, double angleR) {
+    public Straightaway(List<NetworkCorridor> corrs) { //, double angleR) {
       corridors_ = corrs;
       //angleR_ = angleR;
     }
@@ -797,22 +798,22 @@ public class Bundler {
     @Override
     public String toString() {
       String str = "";
-      for(Corridor c : corridors_) str += c.getID() + " ";
+      for(NetworkCorridor c : corridors_) str += c.getID() + " ";
       return str;
     }
 
     public double[] getOffsetEnvelope() {
-      Corridor c0 = corridors_.get(0);
+      NetworkCorridor c0 = corridors_.get(0);
       AnchorPoint from = null;
       double max = -Double.MAX_VALUE, min = Double.MAX_VALUE;
       if(corridors_.size() == 1) from = c0.fPoint();
       else {
-        Corridor c1 = corridors_.get(1);
+        NetworkCorridor c1 = corridors_.get(1);
         if(c1.adjacentTo(c0.tPoint())) from = c0.fPoint();
         if(c1.adjacentTo(c0.fPoint())) from = c0.tPoint();
       }
       for(int i=0; i < corridors_.size(); i++) {
-        Corridor c =corridors_.get(i);
+        NetworkCorridor c =corridors_.get(i);
         AnchorPoint to = c.opposite(from);
         //logger.debug("** corr "+c.getID());
 

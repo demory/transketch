@@ -31,7 +31,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import org.apache.log4j.Logger;
 import org.transketch.core.network.Bundler.Bundle;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 
 /**
  *
@@ -43,7 +43,7 @@ public class AnchorPoint extends AbstractAnchorPoint {
   private int id_;
   private Point2D.Double point_;
 
-  private Set<Corridor> corridors_;
+  private Set<NetworkCorridor> corridors_;
 
   private Map<Integer, Bundle> bundleMap_ = new HashMap<Integer, Bundle>();
   private Set<Integer> bundleAxes_ = new HashSet<Integer>();
@@ -53,7 +53,7 @@ public class AnchorPoint extends AbstractAnchorPoint {
     super(Color.BLACK);
     id_ = id;
     point_ = new Point2D.Double(x,y);
-    corridors_ = new HashSet<Corridor>();
+    corridors_ = new HashSet<NetworkCorridor>();
   }
 
   public int getID() {
@@ -74,15 +74,15 @@ public class AnchorPoint extends AbstractAnchorPoint {
     point_.y += dy;
   }
 
-  public void registerCorridor(Corridor c) {
+  public void registerCorridor(NetworkCorridor c) {
     corridors_.add(c);
   }
 
-  public void unregisterCorridor(Corridor c) {
+  public void unregisterCorridor(NetworkCorridor c) {
     corridors_.remove(c);
   }
 
-  public Collection<Corridor> getCorridors() {
+  public Collection<NetworkCorridor> getCorridors() {
     return corridors_;
   }
 

@@ -30,7 +30,7 @@ import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.core.network.Bundler;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 
 /**
@@ -40,7 +40,7 @@ import org.transketch.core.network.Line;
 public class CreateLineCommand extends EditorBasedCommand implements TSAction {
 
   private Line line_;
-  private Corridor initCorr_;
+  private NetworkCorridor initCorr_;
 
   private int id_;
   private String name_;
@@ -50,7 +50,7 @@ public class CreateLineCommand extends EditorBasedCommand implements TSAction {
     id_ = 0;
   }
 
-  public CreateLineCommand(Editor ed, Corridor initCorr) {
+  public CreateLineCommand(Editor ed, NetworkCorridor initCorr) {
     super(ed);
     id_ = 0;
     initCorr_ = initCorr;

@@ -24,7 +24,7 @@
 
 package org.transketch.core.network;
 
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import java.awt.Color;
 import org.transketch.core.network.stop.Stop;
 import java.awt.geom.Point2D;
@@ -45,6 +45,7 @@ import org.transketch.apps.desktop.TSDocument;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.util.FPUtil;
 import org.jgrapht.graph.Pseudograph;
+import org.transketch.core.network.corridor.StylizedCorridorModel;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -58,10 +59,10 @@ public class TSNetwork {
 
   private TSDocument doc_;
 
-  private Pseudograph<AnchorPoint, Corridor> graph_;
+  private Pseudograph<AnchorPoint, NetworkCorridor> graph_;
 
   private Map<Integer, AnchorPoint> points_;
-  private Map<Integer, Corridor> corridors_;
+  private Map<Integer, NetworkCorridor> corridors_;
   private Map<Integer, Line> lines_;
   private Map<Integer, Stop> stops_;
 
@@ -73,9 +74,9 @@ public class TSNetwork {
   }
 
   public void clear() {
-    graph_= new Pseudograph<AnchorPoint, Corridor>(Corridor.class);
+    graph_= new Pseudograph<AnchorPoint, NetworkCorridor>(NetworkCorridor.class);
     points_ = new HashMap<Integer, AnchorPoint>();
-    corridors_ = new HashMap<Integer, Corridor>();
+    corridors_ = new HashMap<Integer, NetworkCorridor>();
     lines_ = new HashMap<Integer, Line>();
     stops_ = new HashMap<Integer, Stop>();
     maxPointID_ = maxCorridorID_ = maxLineID_= 0;
@@ -126,7 +127,7 @@ public class TSNetwork {
 
   public void deleteAnchorPoint(AnchorPoint point, boolean deleteCorridors) {
     if(deleteCorridors) {
-      for(Corridor c : new HashSet<Corridor>(point.getCorridors())) {
+      for(NetworkCorridor c : new HashSet<NetworkCorridor>(point.getCorridors())) {
         deleteCorridor(c);
       }
     }
@@ -155,14 +156,14 @@ public class TSNetwork {
     return false;
   }
 
-  public void realignCorridorFrom(Corridor corr, AnchorPoint newFrom) {
+  public void realignCorridorFrom(NetworkCorridor corr, AnchorPoint newFrom) {
     AnchorPoint toPt = corr.tPoint();
     graph_.removeEdge(corr);
     graph_.addEdge(newFrom, toPt, corr);
     corr.setFromPoint(newFrom);
   }
 
-  public void realignCorridorTo(Corridor corr, AnchorPoint newTo) {
+  public void realignCorridorTo(NetworkCorridor corr, AnchorPoint newTo) {
     AnchorPoint fromPt = corr.fPoint();
     graph_.removeEdge(corr);
     graph_.addEdge(fromPt, newTo, corr);
@@ -171,15 +172,15 @@ public class TSNetwork {
 
   // CORRIDOR METHODS
 
-  public Collection<Corridor> getCorridors() {
+  public Collection<NetworkCorridor> getCorridors() {
     return corridors_.values();
   }
   
-  public Corridor getCorridor(int id) {
+  public NetworkCorridor getCorridor(int id) {
     return corridors_.get(id);
   }
 
-  public Collection<Corridor> incidentCorridors(AnchorPoint point) {
+  public Collection<NetworkCorridor> incidentCorridors(AnchorPoint point) {
     return graph_.edgesOf(point);
   }
 
@@ -187,22 +188,27 @@ public class TSNetwork {
     return ++maxCorridorID_;
   }
 
-  public void addCorridor(Corridor corr) {
+  public void addCorridor(NetworkCorridor corr) {
     graph_.addEdge(corr.fPoint(), corr.tPoint(), corr);
     corridors_.put(corr.getID(), corr);
   }
 
-  public void deleteCorridor(Corridor corr) {
+  public void deleteCorridor(NetworkCorridor corr) {
     corr.unregisterFromEndpoints();
     graph_.removeEdge(corr);
     corridors_.remove(corr.getID());
   }
   
-  public Corridor getCorridorAtXY(double x, double y, double tol) {
-    Corridor best = null;
+  public NetworkCorridor getCorridorAtXY(double x, double y, double tol) {
+    NetworkCorridor best = null;
     double minDist = tol;
-    for(Corridor c : getCorridors()) {
-      if(c.isStraight()) {
+    for(NetworkCorridor c : getCorridors()) {
+      double dist = c.getModel().distanceTo(x, y);
+      if(dist < minDist) {
+        minDist = dist;
+        best = c;
+      }
+      /*if(c.isStraight()) {
         double dist = FPUtil.distToSegment(x, y, c.x1(), c.y1(), c.x2(), c.y2());
         if(dist < minDist) {
           minDist = dist;
@@ -218,18 +224,18 @@ public class TSNetwork {
           minDist = dist;
           best = c;
         }
-      }
+      }*/
     }
     return best;
   }
 
-  public Corridor getStraightExtension(Corridor corr, AnchorPoint pt) {
+  public NetworkCorridor getStraightExtension(NetworkCorridor corr, AnchorPoint pt) {
     double tol = .001;
-    double corrST = corr.getStraightTheta();
-    for(Corridor c : incidentCorridors(pt)) {
+    double corrST = corr.getModel().getStraightTheta();
+    for(NetworkCorridor c : incidentCorridors(pt)) {
       if(c.sharesEndpointsWith(corr)) continue;
       //logger.debug(c.getStraightTheta() + " vs "+corr.getStraightTheta());
-      if(c.isStraight() && Math.abs(c.getStraightTheta() - corrST) < tol) //c.isVertical() && corr.isVertical() || c.isHorizontal() && corr.isHorizontal())
+      if(c.getModel().isStraight() && Math.abs(c.getModel().getStraightTheta() - corrST) < tol) //c.isVertical() && corr.isVertical() || c.isHorizontal() && corr.isHorizontal())
         return c;
     }
     return null;
@@ -260,50 +266,50 @@ public class TSNetwork {
     lines_.remove(line_.getID());
   }
 
-  public List<Corridor> findPathToLine(Corridor corr, Line line, int maxSteps) {
+  public List<NetworkCorridor> findPathToLine(NetworkCorridor corr, Line line, int maxSteps) {
     //logger.debug("fPTL: corr "+corr.getID()+" to "+line.startPoint().getID()+"/"+line.endPoint().getID());
-    Collection<Corridor> dnt = new HashSet<Corridor>(line.getCorridors()); //Collections.singleton(corr);
+    Collection<NetworkCorridor> dnt = new HashSet<NetworkCorridor>(line.getCorridors()); //Collections.singleton(corr);
     dnt.add(corr);
-    List<Corridor> shortest = null;
+    List<NetworkCorridor> shortest = null;
 
-    List<Corridor> fs = findPathBetweenPoints(corr.fPoint(), line.startPoint(), dnt, maxSteps, " fs> ");
+    List<NetworkCorridor> fs = findPathBetweenPoints(corr.fPoint(), line.startPoint(), dnt, maxSteps, " fs> ");
     //logger.debug(" fs: "+(fs == null ? "none" : "len="+fs.size()));
     if(fs != null && (shortest == null || fs.size() < shortest.size())) shortest = fs;
 
-    List<Corridor> fe = findPathBetweenPoints(corr.fPoint(), line.endPoint(), dnt, maxSteps, " fe> ");
+    List<NetworkCorridor> fe = findPathBetweenPoints(corr.fPoint(), line.endPoint(), dnt, maxSteps, " fe> ");
     //logger.debug(" fe: "+(fe == null ? "none" : "len="+fe.size()));
     if(fe != null && (shortest == null || fe.size() < shortest.size())) shortest = fe;
 
-    List<Corridor> ts = findPathBetweenPoints(corr.tPoint(), line.startPoint(), dnt, maxSteps, " ts> ");
+    List<NetworkCorridor> ts = findPathBetweenPoints(corr.tPoint(), line.startPoint(), dnt, maxSteps, " ts> ");
     //logger.debug(" ts: "+(ts == null ? "none" : "len="+ts.size()));
     if(ts != null && (shortest == null || ts.size() < shortest.size())) shortest = ts;
 
-    List<Corridor> te = findPathBetweenPoints(corr.tPoint(), line.endPoint(), dnt, maxSteps, " te> ");
+    List<NetworkCorridor> te = findPathBetweenPoints(corr.tPoint(), line.endPoint(), dnt, maxSteps, " te> ");
     //logger.debug(" te: "+(te == null ? "none" : "len="+te.size()));
     if(te != null && (shortest == null || te.size() < shortest.size())) shortest = te;
 
     return shortest;
   }
 
-  public List<Corridor> findPathBetweenPoints(AnchorPoint from, AnchorPoint to, Collection<Corridor> doNotTraverse, int maxSteps, String indent) {
+  public List<NetworkCorridor> findPathBetweenPoints(AnchorPoint from, AnchorPoint to, Collection<NetworkCorridor> doNotTraverse, int maxSteps, String indent) {
     Queue<AnchorPoint> q = new LinkedList<AnchorPoint>();
-    Map<AnchorPoint, Corridor> visited = new HashMap<AnchorPoint, Corridor>();
-    List<Corridor> result = new LinkedList<Corridor>();
+    Map<AnchorPoint, NetworkCorridor> visited = new HashMap<AnchorPoint, NetworkCorridor>();
+    List<NetworkCorridor> result = new LinkedList<NetworkCorridor>();
 
     q.add(from);
     visited.put(from, null);
 
     while(!q.isEmpty()) {
       AnchorPoint pt = q.poll();
-      for(Corridor corr : incidentCorridors(pt)) {
+      for(NetworkCorridor corr : incidentCorridors(pt)) {
         if(doNotTraverse.contains(corr)) continue;
         AnchorPoint opp = corr.opposite(pt);
         if(opp == to) {
-          List<Corridor> path = new LinkedList<Corridor>();
+          List<NetworkCorridor> path = new LinkedList<NetworkCorridor>();
           path.add(corr);
           AnchorPoint p = pt;
           while(true) {
-            Corridor c = visited.get(p);
+            NetworkCorridor c = visited.get(p);
             if(c == null) break;
             path.add(c);
             p = c.opposite(p);
@@ -400,11 +406,14 @@ public class TSNetwork {
             if(id > maxID) maxID = id;
             int fpoint = new Integer(attributes.getNamedItem("fpoint").getNodeValue()).intValue();
             int tpoint = new Integer(attributes.getNamedItem("tpoint").getNodeValue()).intValue();
-            Corridor corr = new Corridor(id, points_.get(fpoint), points_.get(tpoint), false);
-            addCorridor(corr);
+            NetworkCorridor corr = new NetworkCorridor(id, points_.get(fpoint), points_.get(tpoint), false);
 
-            if(attributes.getNamedItem("theta") != null)
-              corr.setElbowAngle(Double.parseDouble(attributes.getNamedItem("theta").getNodeValue()));
+            StylizedCorridorModel scm = new StylizedCorridorModel(corr);           
+            if(attributes.getNamedItem("theta") != null) {
+              scm.setElbowAngle(Double.parseDouble(attributes.getNamedItem("theta").getNodeValue()));
+            }
+            corr.setModel(scm);
+            addCorridor(corr);
           }
         }
         maxCorridorID_ = maxID;
@@ -437,7 +446,7 @@ public class TSNetwork {
             if(attributes.getNamedItem("corridors") != null) {
               String[] corrIDs = attributes.getNamedItem("corridors").getNodeValue().split(",");
               for(String corrID : corrIDs) {
-                Corridor corr = corridors_.get(new Integer(corrID));
+                NetworkCorridor corr = corridors_.get(new Integer(corrID));
                 line.initCorridor(corr);
                 //logger.debug(" added corr "+corrID);
               }
@@ -597,7 +606,7 @@ public class TSNetwork {
     }
     xml += indent+"</points>\n";
     xml += indent+"<corridors>\n";
-    for(Corridor corr : getCorridors()) {
+    for(NetworkCorridor corr : getCorridors()) {
       xml += indent+"  "+corr.getXML();
     }
     xml += indent+"</corridors>\n";

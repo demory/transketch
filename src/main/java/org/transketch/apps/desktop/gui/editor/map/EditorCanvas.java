@@ -49,10 +49,11 @@ import org.transketch.apps.desktop.command.network.*;
 import org.transketch.apps.desktop.gui.editor.EditorToolbar;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.Bundler;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 import org.transketch.core.network.PreviewAnchorPoint;
 import org.transketch.core.network.corridor.PreviewCorridor;
+import org.transketch.core.network.corridor.StylizedCorridorModel;
 import org.transketch.core.network.line.LineLayerIndexComparator;
 import org.transketch.core.network.stop.Stop;
 
@@ -73,7 +74,7 @@ public class EditorCanvas extends Viewport {
   private AnchorPoint fromAnchor_;
   private PreviewAnchorPoint previewAnchor_ = null;
   private PreviewCorridor previewCorr_ = null;
-  private List<Corridor> lineCorridors_ = null, lineAdditionPath_;
+  private List<NetworkCorridor> lineCorridors_ = null, lineAdditionPath_;
   
   private Set<Drawable> highlightedItems_;
 
@@ -186,7 +187,7 @@ public class EditorCanvas extends Viewport {
         else {
           if(corrFlipped_) previewCorr_.setFPoint(hoverPoint);
           else previewCorr_.setTPoint(hoverPoint);
-          previewCorr_.updateGeometry();
+          previewCorr_.getModel().updateGeometry();
         }
       }
       else {
@@ -196,7 +197,7 @@ public class EditorCanvas extends Viewport {
         else {
           if(corrFlipped_) previewCorr_.setFPoint(mousePoint);
           else previewCorr_.setTPoint(mousePoint);
-          previewCorr_.updateGeometry();
+          previewCorr_.getModel().updateGeometry();
         }
       }
 
@@ -214,7 +215,7 @@ public class EditorCanvas extends Viewport {
     if(toolbarAction == EditorToolbar.ActionType.MODIFY_LINE && ed_.getSelectedLine() != null) {
       Line line = ed_.getSelectedLine();
       if(hoverItem_ != null && hoverItem_.getDrawableType() == Drawable.Type.CORRIDOR) {
-        Corridor corr = (Corridor) hoverItem_;
+        NetworkCorridor corr = (NetworkCorridor) hoverItem_;
         if(line.size() == lineCorridors_.size() && !line.contains(corr)) {
           //logger.debug("adding corr "+((Corridor) hoverItem_).getID());
           if(line.addCorridor(corr)) { // try adding single, presumably adjacent corridor
@@ -229,7 +230,7 @@ public class EditorCanvas extends Viewport {
             if(lineAdditionPath_ != null) {
               lineAdditionPath_.add(corr);
               success = true;
-              for(Corridor c : lineAdditionPath_) success = success & line.addCorridor(c);
+              for(NetworkCorridor c : lineAdditionPath_) success = success & line.addCorridor(c);
             }
             if(success) {
               new Bundler(doc_.getNetwork());
@@ -273,10 +274,10 @@ public class EditorCanvas extends Viewport {
         else
           draggingPoint_.moveBy(-dx, -dy);
         
-        for(Corridor corr : doc_.getNetwork().incidentCorridors(draggingPoint_))
-          corr.updateGeometry();
+        for(NetworkCorridor corr : doc_.getNetwork().incidentCorridors(draggingPoint_))
+          corr.getModel().updateGeometry();
 
-        doc_.getNetwork().rebundle();
+        //doc_.getNetwork().rebundle();
         repaint();
         break;
     }
@@ -302,7 +303,8 @@ public class EditorCanvas extends Viewport {
             case KeyEvent.VK_CONTROL:
               if(previewCorr_ != null && e.getID() == KeyEvent.KEY_RELEASED) {
                 corr90Deg_ = !corr90Deg_;
-                previewCorr_.setElbowAngle(Math.toRadians(corr90Deg_ ? 90 : 135));
+                StylizedCorridorModel scm = (StylizedCorridorModel) previewCorr_.getModel();
+                scm.setElbowAngle(Math.toRadians(corr90Deg_ ? 90 : 135));
                 repaint();
               }
               break;
@@ -385,7 +387,7 @@ public class EditorCanvas extends Viewport {
 
   public void startEditingLine(Line line) {
     if(ed_.getSelectedLine() != line) ed_.setSelectedLine(line);
-    lineCorridors_ = new LinkedList<Corridor>();
+    lineCorridors_ = new LinkedList<NetworkCorridor>();
     lineCorridors_.addAll(line.getCorridors());
     Collections.reverse(lineCorridors_);
     clearHighlightedItems();
@@ -511,7 +513,7 @@ public class EditorCanvas extends Viewport {
             repaint();
           }
           else {
-            Corridor corr = doc_.getNetwork().getCorridorAtXY(wx, wy,
+            NetworkCorridor corr = doc_.getNetwork().getCorridorAtXY(wx, wy,
               ed_.getPane().getCanvas().getClickToleranceW());
             if(corr == line.firstCorridor() || corr == line.lastCorridor()) {
               invoker_.doCommand(new RemoveCorridorsFromLineCommand(ed_, line, corr));
@@ -537,7 +539,7 @@ public class EditorCanvas extends Viewport {
         anchorPointMenu_.show(this, mx, my);// setLocation(mx, my);
         break;
       case CORRIDOR:
-        corridorMenu_.setCorridor((Corridor) clickedItem);
+        corridorMenu_.setCorridor((NetworkCorridor) clickedItem);
         corridorMenu_.show(this, mx, my);// setLocation(mx, my);
         break;
       case STOP:
@@ -574,8 +576,8 @@ public class EditorCanvas extends Viewport {
     }
     else {
       double theta = corr90Deg_ ? Math.PI/2 : 3*Math.PI/4;
-      if(corrFlipped_) invoker_.doCommand(new CreateCorridorCommand(ed_, pt, fromAnchor_, theta, false));
-      else invoker_.doCommand(new CreateCorridorCommand(ed_, fromAnchor_, pt, theta, false));
+      if(corrFlipped_) invoker_.doCommand(new CreateStylizedCorridorCommand(ed_, pt, fromAnchor_, theta, false));
+      else invoker_.doCommand(new CreateStylizedCorridorCommand(ed_, fromAnchor_, pt, theta, false));
       removeHighlightedItem(fromAnchor_);
       previewCorr_ = null;
       fromAnchor_ = null;
@@ -647,7 +649,7 @@ public class EditorCanvas extends Viewport {
     if(ed_.getBoolProperty(Editor.Property.SHOW_GRID)) drawGrid();
     
     if(ed_.getBoolProperty(Editor.Property.SHOW_CORRIDORS))
-      for(Corridor corr : doc_.getNetwork().getCorridors()) {
+      for(NetworkCorridor corr : doc_.getNetwork().getCorridors()) {
         if(highlightedItems_.contains(corr)) corr.drawHighlight(this, highlightColor);
         corr.draw(this);
       }

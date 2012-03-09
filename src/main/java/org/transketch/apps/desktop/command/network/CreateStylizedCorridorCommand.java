@@ -29,28 +29,29 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.core.network.AnchorPoint;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
+import org.transketch.core.network.corridor.StylizedCorridorModel;
 
 /**
  *
  * @author demory
  */
-public class CreateCorridorCommand extends EditorBasedCommand implements TSAction {
+public class CreateStylizedCorridorCommand extends EditorBasedCommand implements TSAction {
 
-  private Corridor corridor_;
+  private NetworkCorridor corridor_;
   private AnchorPoint from_, to_;
   private boolean checkOrientation_;
   private double thetaR_;
 
-  public CreateCorridorCommand(Editor ed, AnchorPoint from, AnchorPoint to) {
+  public CreateStylizedCorridorCommand(Editor ed, AnchorPoint from, AnchorPoint to) {
     this(ed, from, to, 3*Math.PI/4, true);
   }
 
-  public CreateCorridorCommand(Editor ed, AnchorPoint from, AnchorPoint to, double thetaR) {
+  public CreateStylizedCorridorCommand(Editor ed, AnchorPoint from, AnchorPoint to, double thetaR) {
     this(ed, from, to, thetaR, true);
   }
 
-  public CreateCorridorCommand(Editor ed, AnchorPoint from, AnchorPoint to, double thetaR, boolean checkOrientation) {
+  public CreateStylizedCorridorCommand(Editor ed, AnchorPoint from, AnchorPoint to, double thetaR, boolean checkOrientation) {
     super(ed);
     from_ = from;
     to_ = to;
@@ -59,8 +60,11 @@ public class CreateCorridorCommand extends EditorBasedCommand implements TSActio
   }
 
   public boolean doThis(TranSketch ts) {
-    if(corridor_ == null) corridor_ = new Corridor(ed_.getDocument().getNetwork().newCorridorID(), from_, to_, checkOrientation_);
-    corridor_.setElbowAngle(thetaR_);
+    if(corridor_ == null) corridor_ = new NetworkCorridor(ed_.getDocument().getNetwork().newCorridorID(), from_, to_, checkOrientation_);
+    
+    StylizedCorridorModel scm = new StylizedCorridorModel(corridor_);
+    scm.setElbowAngle(thetaR_);
+    corridor_.setModel(scm); 
     ed_.getDocument().getNetwork().addCorridor(corridor_);
     return true;
   }
@@ -76,7 +80,7 @@ public class CreateCorridorCommand extends EditorBasedCommand implements TSActio
     return "Create Corridor";
   }
 
-  public Corridor getCorridor() {
+  public NetworkCorridor getCorridor() {
     return corridor_;
   }
 

@@ -35,7 +35,8 @@ import org.transketch.apps.desktop.command.file.NewFileCommand;
 import org.transketch.apps.desktop.command.file.SaveFileAsCommand;
 import org.transketch.apps.desktop.command.file.SaveFileCommand;
 import org.transketch.apps.desktop.command.network.CreateLineCommand;
-import org.transketch.apps.desktop.command.network.ImportOTPCommand;
+import org.transketch.apps.desktop.command.network.ImportOTPFileCommand;
+import org.transketch.apps.desktop.command.network.ImportOTPURLCommand;
 import org.transketch.apps.desktop.command.network.RebundleCommand;
 import org.transketch.apps.desktop.command.system.DebugActionCommand;
 import org.transketch.apps.desktop.command.system.ExitCommand;
@@ -59,7 +60,7 @@ public class CommandFactory {
     // Menu keys:
     FILE_NEW, FILE_LOAD, FILE_SAVE, FILE_SAVE_AS, FILE_EXPORT_PNG, FILE_EXPORT_SVG, FILE_EXIT, FILE_CLEAR_RECENT,
     EDIT_UNDO, EDIT_REDO,
-    TOOLS_REBUNDLE, TOOLS_IMPORT_OTP,
+    TOOLS_REBUNDLE, TOOLS_IMPORT_OTP_FILE, TOOLS_IMPORT_OTP_URL,
     VIEW_ZOOM_TO_EXTENTS,
     HELP_ABOUT,
     DEBUG,
@@ -91,7 +92,8 @@ public class CommandFactory {
       case EDIT_REDO: return new RedoCommand(ts_.getActiveEditor());
       case CREATE_LINE: return new CreateLineCommand(ts_.getActiveEditor());
       case TOOLS_REBUNDLE: return new RebundleCommand(ts_.getActiveEditor());
-      case TOOLS_IMPORT_OTP: return new ImportOTPCommand(ts_.getActiveEditor());
+      case TOOLS_IMPORT_OTP_FILE: return new ImportOTPFileCommand(ts_.getActiveEditor());
+      case TOOLS_IMPORT_OTP_URL: return new ImportOTPURLCommand(ts_.getActiveEditor());
       case VIEW_ZOOM_TO_EXTENTS: return new ZoomToExtentsCommand(ts_.getActiveEditor().getPane().getCanvas(), ts_.getActiveEditor().getDocument().getNetwork().getBoundingBox());
       case HELP_ABOUT: return new ShowAboutCommand();
       case DEBUG: return new DebugActionCommand(ts_.getActiveEditor());

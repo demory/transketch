@@ -27,7 +27,7 @@ import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 
 /**
  *
@@ -35,9 +35,9 @@ import org.transketch.core.network.corridor.Corridor;
  */
 public class FlipCorridorCommand extends EditorBasedCommand implements TSAction {
 
-  private Corridor corr_;
+  private NetworkCorridor corr_;
 
-  public FlipCorridorCommand(Editor ed, Corridor corr) {
+  public FlipCorridorCommand(Editor ed, NetworkCorridor corr) {
     super(ed);
     corr_ = corr;
   }

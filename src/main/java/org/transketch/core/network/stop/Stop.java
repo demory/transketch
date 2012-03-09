@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
 import org.transketch.core.network.TSNetwork;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.LabelStyle;
 import org.transketch.core.network.Line;
 import org.transketch.util.FPUtil;
@@ -154,7 +154,7 @@ public abstract class Stop implements Drawable {
 
   public abstract int getScreenY(MapCoordinates coords);
   
-  public abstract Collection<Corridor> getCorridors();
+  public abstract Collection<NetworkCorridor> getCorridors();
 
   public String getXML(String indent) {
     String xml = "";

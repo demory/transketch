@@ -35,7 +35,7 @@ import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.Bundler;
 import org.transketch.core.network.TSNetwork;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 import org.transketch.core.network.stop.Stop;
 
@@ -47,7 +47,7 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
 
   private AnchorPoint toMerge_, mergeTo_;
 
-  private Set<Corridor> deletedCorridors_, realignedCorridors_;
+  private Set<NetworkCorridor> deletedCorridors_, realignedCorridors_;
   private Set<Stop> deletedStops_;
   private Map<Line, Line.AlignmentSnapshot> affectedLines_;
 
@@ -59,12 +59,12 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
 
   @Override
   public boolean initialize() {
-    deletedCorridors_ = new HashSet<Corridor>();
-    realignedCorridors_ = new HashSet<Corridor>();
+    deletedCorridors_ = new HashSet<NetworkCorridor>();
+    realignedCorridors_ = new HashSet<NetworkCorridor>();
     deletedStops_ = new HashSet<Stop>(ed_.getDocument().getNetwork().getStops(toMerge_));
     affectedLines_ = new HashMap<Line, Line.AlignmentSnapshot>();
 
-    for(Corridor corr : ed_.getDocument().getNetwork().incidentCorridors(toMerge_)) {
+    for(NetworkCorridor corr : ed_.getDocument().getNetwork().incidentCorridors(toMerge_)) {
       if(corr.opposite(toMerge_) == mergeTo_) {
         deletedCorridors_.add(corr);
         for(Line line : corr.getLines()) {
@@ -80,12 +80,12 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
   public boolean doThis(TranSketch ts) {
     TSNetwork net = ed_.getDocument().getNetwork();
     net.deleteAnchorPoint(toMerge_, false);
-    for(Corridor corr : deletedCorridors_) {
+    for(NetworkCorridor corr : deletedCorridors_) {
       net.deleteCorridor(corr);
       for(Line line : corr.getLines())
         line.removeCorridor(corr, false);
     }
-    for(Corridor corr : realignedCorridors_) {
+    for(NetworkCorridor corr : realignedCorridors_) {
       if(corr.fPoint() == toMerge_)
         net.realignCorridorFrom(corr, mergeTo_); //corr.setFromPoint(mergeTo_);
       else
@@ -101,10 +101,10 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
   public boolean undoThis(TranSketch ts) {
     TSNetwork net = ed_.getDocument().getNetwork();
     net.addAnchorPoint(toMerge_);
-    for(Corridor corr : deletedCorridors_) {
+    for(NetworkCorridor corr : deletedCorridors_) {
       net.addCorridor(corr);
     }
-    for(Corridor corr : realignedCorridors_) {
+    for(NetworkCorridor corr : realignedCorridors_) {
       if(corr.fPoint() == mergeTo_)
         net.realignCorridorFrom(corr, toMerge_); //corr.setFromPoint(toMerge_);
       else

@@ -31,7 +31,7 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.core.network.AnchorPoint;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 
 /**
  *
@@ -64,7 +64,7 @@ public class DeleteAnchorPointCommand extends EditorBasedCommand implements TSAc
     if(point_ == null) return false;
 
     delCorrCommands_ = new HashSet<DeleteCorridorCommand>();
-    for(Corridor corr : ed_.getDocument().getNetwork().incidentCorridors(point_))
+    for(NetworkCorridor corr : ed_.getDocument().getNetwork().incidentCorridors(point_))
         delCorrCommands_.add(new DeleteCorridorCommand(ed_, corr));
 
     ed_.getPane().getCanvas().deletingDrawable(point_);

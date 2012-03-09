@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.Map;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.TSNetwork;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.util.viewport.MapCoordinates;
 
 /**
@@ -74,7 +74,7 @@ public class AnchorBasedStop extends Stop {
   } 
   
   @Override
-  public Collection<Corridor> getCorridors() {
+  public Collection<NetworkCorridor> getCorridors() {
     return anchor_.getCorridors();
   }
 

@@ -38,7 +38,7 @@ import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
 import org.transketch.apps.desktop.gui.editor.map.EditorCanvas;
 import org.transketch.core.NamedItem;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.corridor.CorridorComponent;
 import org.transketch.util.FPUtil;
 import org.transketch.util.viewport.MapCoordinates;
@@ -59,7 +59,7 @@ public class Line implements Drawable, NamedItem {
   private LineStyle style_;
   private Map<String, Color> styleColors_;
 
-  private List<Corridor> corridors_;
+  private List<NetworkCorridor> corridors_;
   private Map<Integer, CorridorInfo> corridorInfo_;
 
   private boolean enabled_, highlighted_, bundled_ = true;
@@ -72,7 +72,7 @@ public class Line implements Drawable, NamedItem {
   public Line(int id, String name, LineStyle style) {
     id_ = id;
     name_ = name;
-    corridors_ = new ArrayList<Corridor>();
+    corridors_ = new ArrayList<NetworkCorridor>();
     corridorInfo_ = new HashMap<Integer, CorridorInfo>();
     style_ = style;
     styleColors_ = new HashMap<String, Color>();
@@ -99,7 +99,7 @@ public class Line implements Drawable, NamedItem {
 
   public Rectangle2D getBoundingBox() {
     Rectangle2D bbox = new Rectangle2D.Double();
-    for(Corridor corr : corridors_) {
+    for(NetworkCorridor corr : corridors_) {
       bbox.add(corr.fPoint().getPoint2D());
       bbox.add(corr.tPoint().getPoint2D());
     }
@@ -174,7 +174,7 @@ public class Line implements Drawable, NamedItem {
     if(corridors_.size() == 0) return null;
     if(corridors_.size() == 1) return corridors_.get(0).fPoint();
 
-    Corridor first = corridors_.get(0), second = corridors_.get(1);
+    NetworkCorridor first = corridors_.get(0), second = corridors_.get(1);
     if(first.tPoint() == second.fPoint() || first.tPoint() == second.tPoint())
       return first.fPoint();
     if(first.fPoint() == second.fPoint() || first.fPoint() == second.tPoint())
@@ -187,7 +187,7 @@ public class Line implements Drawable, NamedItem {
     if(corridors_.size() == 0) return null;
     if(corridors_.size() == 1) return corridors_.get(0).tPoint();
 
-    Corridor last = corridors_.get(corridors_.size()-1), previous = corridors_.get(corridors_.size()-2);
+    NetworkCorridor last = corridors_.get(corridors_.size()-1), previous = corridors_.get(corridors_.size()-2);
     if(last.tPoint() == previous.fPoint() || last.tPoint() == previous.tPoint())
       return last.fPoint();
     if(last.fPoint() == previous.fPoint() || last.fPoint() == previous.tPoint())
@@ -196,19 +196,19 @@ public class Line implements Drawable, NamedItem {
     return null;
   }
 
-  public Corridor firstCorridor() {
+  public NetworkCorridor firstCorridor() {
     if(corridors_.size() == 0) return null;
     return corridors_.get(0);
   }
 
-  public Corridor lastCorridor() {
+  public NetworkCorridor lastCorridor() {
     if(corridors_.size() == 0) return null;
     return corridors_.get(corridors_.size()-1);
   }
 
-  public AnchorPoint fromPoint(Corridor corr) {
+  public AnchorPoint fromPoint(NetworkCorridor corr) {
     AnchorPoint from = startPoint(), to;
-    for(Corridor c : corridors_) {
+    for(NetworkCorridor c : corridors_) {
       to = c.opposite(from);
       if(c == corr) return from;
       from = to;
@@ -216,9 +216,9 @@ public class Line implements Drawable, NamedItem {
     return null;
   }
 
-  public AnchorPoint toPoint(Corridor corr) {
+  public AnchorPoint toPoint(NetworkCorridor corr) {
     AnchorPoint from = startPoint(), to;
-    for(Corridor c : corridors_) {
+    for(NetworkCorridor c : corridors_) {
       to = c.opposite(from);
       if(c == corr) return to;
       from = to;
@@ -226,7 +226,7 @@ public class Line implements Drawable, NamedItem {
     return null;
   }
 
-  public Corridor adjacent(Corridor corr, AnchorPoint anchor) {
+  public NetworkCorridor adjacent(NetworkCorridor corr, AnchorPoint anchor) {
 
     if(corr.fPoint() != anchor && corr.tPoint() != anchor) return null;
     if(anchor == startPoint() || anchor == endPoint()) return null;
@@ -234,7 +234,7 @@ public class Line implements Drawable, NamedItem {
 
     AnchorPoint from = startPoint(), to;
     int i = 0;
-    for(Corridor c : corridors_) {
+    for(NetworkCorridor c : corridors_) {
       to = c.opposite(from);
       if(c == corr) {
         if(from == anchor) return corridors_.get(i-1);
@@ -255,22 +255,22 @@ public class Line implements Drawable, NamedItem {
     return name_.compareTo(((Line) o).getName());
   }*/
 
-  public void initCorridor(Corridor corr) {
+  public void initCorridor(NetworkCorridor corr) {
     initCorridor(corr, 0, 0, 0, 0);
   }
   
-  public void initCorridor(Corridor corr, int offsetFrom, int offsetTo, int openMonth, int openYear) {
+  public void initCorridor(NetworkCorridor corr, int offsetFrom, int offsetTo, int openMonth, int openYear) {
     corridors_.add(corr);
     corridorInfo_.put(corr.getID(), new CorridorInfo(offsetFrom, offsetTo, openMonth, openYear));
     corr.registerLine(this);
   }
 
-  public boolean contains(Corridor c) {
+  public boolean contains(NetworkCorridor c) {
     return corridors_.contains(c);
   }
 
   public boolean contains(Line l) {
-    for(Corridor c : l.corridors_)
+    for(NetworkCorridor c : l.corridors_)
       if(!this.contains(c)) return false;
     return true;
   }
@@ -284,7 +284,7 @@ public class Line implements Drawable, NamedItem {
     
     // special case for containment of single-corridor line:
     if(line.getCorridors().size() == 1) {
-      Corridor corr = line.firstCorridor();
+      NetworkCorridor corr = line.firstCorridor();
       if(this.contains(corr)) {
         if(this.fromPoint(corr) == corr.fPoint()) return 1;
         else return -1;
@@ -293,10 +293,10 @@ public class Line implements Drawable, NamedItem {
     }
 
     String thisStr = "", fwStr = "", bwStr = "";
-    for(Corridor corr : corridors_) {
+    for(NetworkCorridor corr : corridors_) {
       thisStr += corr.getID() + "_";
     }
-    for(Corridor corr : line.corridors_) {
+    for(NetworkCorridor corr : line.corridors_) {
       fwStr += corr.getID() + "_";
       bwStr = corr.getID() + "_" + bwStr;
     }
@@ -308,7 +308,7 @@ public class Line implements Drawable, NamedItem {
 
   public void initBaseOffset(int offset) {
     AnchorPoint a = startPoint();
-    for(Corridor c : corridors_) {
+    for(NetworkCorridor c : corridors_) {
       CorridorInfo ci = corridorInfo_.get(c.getID());
       if(a != c.fPoint()) {
         ci.offsetFrom_ = -offset;
@@ -323,7 +323,7 @@ public class Line implements Drawable, NamedItem {
     }
   }
 
-  public boolean addCorridor(Corridor corr) {
+  public boolean addCorridor(NetworkCorridor corr) {
     if(corridors_.contains(corr)) return false;
     if(corridors_.isEmpty()) {
       corridors_.add(corr);
@@ -346,17 +346,17 @@ public class Line implements Drawable, NamedItem {
     return false;
   }
 
-  public boolean addCorridors(Collection<Corridor> corrs) {
-    for(Corridor corr : corrs)
+  public boolean addCorridors(Collection<NetworkCorridor> corrs) {
+    for(NetworkCorridor corr : corrs)
       if(!addCorridor(corr)) return false;
     return true;
   }
   
-  public boolean removeCorridor(Corridor corr) {
+  public boolean removeCorridor(NetworkCorridor corr) {
     return removeCorridor(corr, true);
   }
 
-  public boolean removeCorridor(Corridor corr, boolean unregister) {
+  public boolean removeCorridor(NetworkCorridor corr, boolean unregister) {
     boolean success = corridors_.remove(corr);
     if(success) {
       corridorInfo_.remove(corr.getID());
@@ -369,9 +369,9 @@ public class Line implements Drawable, NamedItem {
     while(size() > 0) removeCorridor(firstCorridor());
   }
 
-  public void splitCorridor(Corridor old, Corridor new1, Corridor new2) {
+  public void splitCorridor(NetworkCorridor old, NetworkCorridor new1, NetworkCorridor new2) {
     logger.debug("splitCorridor "+name_+" at "+old.toString());
-    List<Corridor> newList = new ArrayList<Corridor>();
+    List<NetworkCorridor> newList = new ArrayList<NetworkCorridor>();
 
     // special case: we are splitting the one corridor in this line
     if(corridors_.size() == 1 && corridors_.get(0) == old) {
@@ -382,7 +382,7 @@ public class Line implements Drawable, NamedItem {
     // the standard case:
     else {
      AnchorPoint pt = startPoint();
-     for(Corridor c : corridors_) {
+     for(NetworkCorridor c : corridors_) {
        if(c == old) {
          if(new1.adjacentTo(pt)) {
            newList.add(new1);
@@ -404,8 +404,8 @@ public class Line implements Drawable, NamedItem {
 
     corridors_ = newList;
     CorridorInfo oldCI = corridorInfo_.get(old.getID());
-    CorridorInfo newCI1 = new CorridorInfo(oldCI.offsetFrom_, new1.isStraight() ? oldCI.offsetFrom_ : oldCI.offsetTo_, oldCI.openMonth_, oldCI.openYear_);
-    CorridorInfo newCI2 = new CorridorInfo(new2.isStraight() ? oldCI.offsetTo_ : oldCI.offsetFrom_, oldCI.offsetTo_, oldCI.openMonth_, oldCI.openYear_);
+    CorridorInfo newCI1 = new CorridorInfo(oldCI.offsetFrom_, new1.getModel().isStraight() ? oldCI.offsetFrom_ : oldCI.offsetTo_, oldCI.openMonth_, oldCI.openYear_);
+    CorridorInfo newCI2 = new CorridorInfo(new2.getModel().isStraight() ? oldCI.offsetTo_ : oldCI.offsetFrom_, oldCI.offsetTo_, oldCI.openMonth_, oldCI.openYear_);
     corridorInfo_.put(new1.getID(), newCI1);
     corridorInfo_.put(new2.getID(), newCI2);
     corridorInfo_.remove(old.getID());
@@ -415,12 +415,12 @@ public class Line implements Drawable, NamedItem {
 
   }
 
-  public void unsplitCorridor(Corridor old, Corridor new1, Corridor new2) {
+  public void unsplitCorridor(NetworkCorridor old, NetworkCorridor new1, NetworkCorridor new2) {
     logger.debug("splitCorridor "+name_+" at "+old.toString());
-    List<Corridor> newList = new ArrayList<Corridor>();
+    List<NetworkCorridor> newList = new ArrayList<NetworkCorridor>();
 
     String str = "usC before:";
-    for(Corridor c : corridors_) str+=" " + c.getID();
+    for(NetworkCorridor c : corridors_) str+=" " + c.getID();
     logger.debug(str);
 
     for(int i = 0; i < corridors_.size()-1; i++) {
@@ -437,7 +437,7 @@ public class Line implements Drawable, NamedItem {
     }
 
     str = "usC after:";
-    for(Corridor c : corridors_) str+=" " + c.getID();
+    for(NetworkCorridor c : corridors_) str+=" " + c.getID();
     logger.debug(str);
     
     corridors_ = newList;
@@ -458,11 +458,11 @@ public class Line implements Drawable, NamedItem {
       ci.offsetFrom_ = ci.offsetTo_ = 0;
   }
 
-  public Collection<Corridor> getCorridors() {
+  public Collection<NetworkCorridor> getCorridors() {
     return corridors_;
   }
 
-  public CorridorInfo getCorridorInfo(Corridor corr) {
+  public CorridorInfo getCorridorInfo(NetworkCorridor corr) {
     return corridorInfo_.get(corr.getID());
   }
 
@@ -471,7 +471,7 @@ public class Line implements Drawable, NamedItem {
   }
 
   public void restoreAlignment(AlignmentSnapshot alignment) {
-    corridors_ = new LinkedList<Corridor>(alignment.corridors_);
+    corridors_ = new LinkedList<NetworkCorridor>(alignment.corridors_);
     corridorInfo_ = new HashMap<Integer, CorridorInfo>(alignment.corridorInfo_);
     /*for(Map.Entry<Integer, CorridorInfo> entry : alignment.corridorInfo_.entrySet()) {
       corridorInfo_.put(entry.getKey(), new CorridorInfo(entry.getValue()));
@@ -568,13 +568,13 @@ public class Line implements Drawable, NamedItem {
 
     List<CorridorComponent> allComps = new ArrayList<CorridorComponent>();
     for(int iCorr=0; iCorr < corridors_.size(); iCorr++) {
-      Corridor corr = corridors_.get(iCorr);
+      NetworkCorridor corr = corridors_.get(iCorr);
       CorridorInfo ci = corridorInfo_.get(corr.getID());
       toPt = corr.opposite(fromPt);
       int offsetFrom = ci.offsetFrom_ + additionalOffset;
       int offsetTo = ci.offsetTo_ + additionalOffset;
       
-      List<CorridorComponent> comps = corr.getOffsetComponents(offsetFrom, offsetTo, coords, (corr.fPoint() == fromPt));
+      List<CorridorComponent> comps = corr.getModel().getOffsetComponents(offsetFrom, offsetTo, coords, (corr.fPoint() == fromPt));
       for(int iComp=0; iComp < comps.size(); iComp++) {
         CorridorComponent comp = comps.get(iComp);
 
@@ -641,7 +641,7 @@ public class Line implements Drawable, NamedItem {
 
   public String getXML(String prefix) {
     String corrIDs = "";
-    for(Corridor corr : corridors_) {
+    for(NetworkCorridor corr : corridors_) {
       corrIDs += corr.getID()+",";
     }
     if(corrIDs.length() > 0) corrIDs = corrIDs.substring(0, corrIDs.length()-1); // chop off trailing comma
@@ -693,11 +693,11 @@ public class Line implements Drawable, NamedItem {
 
   public class AlignmentSnapshot {
 
-    private List<Corridor> corridors_;
+    private List<NetworkCorridor> corridors_;
     private Map<Integer, CorridorInfo> corridorInfo_;
 
     public AlignmentSnapshot() {
-      corridors_ = new LinkedList<Corridor>(Line.this.corridors_);
+      corridors_ = new LinkedList<NetworkCorridor>(Line.this.corridors_);
       corridorInfo_ = new HashMap<Integer, CorridorInfo>(Line.this.corridorInfo_);
       /*for(Map.Entry<Integer, CorridorInfo> entry : Line.this.corridorInfo_.entrySet()) {
         corridorInfo_.put(entry.getKey(), new CorridorInfo(entry.getValue()));

@@ -30,7 +30,7 @@ import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 
 /**
@@ -39,7 +39,7 @@ import org.transketch.core.network.Line;
  */
 public class DeleteCorridorCommand extends EditorBasedCommand implements TSAction {
 
-  private Corridor corridor_;
+  private NetworkCorridor corridor_;
   private double wx_, wy_;
 
   private Set<DeleteLineCommand> deleteLineCommands_;
@@ -50,7 +50,7 @@ public class DeleteCorridorCommand extends EditorBasedCommand implements TSActio
     wy_ = wy;
   }
 
-  public DeleteCorridorCommand(Editor ed, Corridor corr) {
+  public DeleteCorridorCommand(Editor ed, NetworkCorridor corr) {
     super(ed);
     corridor_ = corr;
   }

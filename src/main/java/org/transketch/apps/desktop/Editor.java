@@ -33,7 +33,7 @@ import org.transketch.apps.desktop.gui.editor.EditorPane;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.TSNetwork;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 import org.transketch.core.network.stop.Stop;
 
@@ -171,10 +171,10 @@ public class Editor {
     // check corridors
     tol = pane_.getCanvas().getCoordinates().dxToWorld(2);
     if(eligibleTypes.contains(Drawable.Type.CORRIDOR) && getBoolProperty(Property.SHOW_CORRIDORS)) {
-      Corridor closest = null;
+      NetworkCorridor closest = null;
       double closestDist = Double.MAX_VALUE;
-      for(Corridor corr : net.getCorridors()) {
-        double dist = corr.distanceTo(wx, wy); // nearestPoint(wx, wy).distance(wx, wy);
+      for(NetworkCorridor corr : net.getCorridors()) {
+        double dist = corr.getModel().distanceTo(wx, wy); // nearestPoint(wx, wy).distance(wx, wy);
         if(dist <= tol && dist < closestDist) {
           closestDist = dist;
           closest = corr;

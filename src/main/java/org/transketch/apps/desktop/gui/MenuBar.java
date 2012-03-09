@@ -91,7 +91,9 @@ public class MenuBar extends JMenuBar {
 
     JMenu toolsMenu = new JMenu("Tools");
     newMenuItem(toolsMenu, "Run Bundler", CommandFactory.Key.TOOLS_REBUNDLE);
-    newMenuItem(toolsMenu, "Run OTP Importer", CommandFactory.Key.TOOLS_IMPORT_OTP);
+    toolsMenu.addSeparator();
+    newMenuItem(toolsMenu, "Import OTP Data From URL", CommandFactory.Key.TOOLS_IMPORT_OTP_URL);
+    newMenuItem(toolsMenu, "Import OTP Data From File", CommandFactory.Key.TOOLS_IMPORT_OTP_FILE);
     add(toolsMenu);
 
     JMenu viewMenu = new JMenu("View");

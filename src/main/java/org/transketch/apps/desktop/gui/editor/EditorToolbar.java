@@ -24,6 +24,7 @@
 
 package org.transketch.apps.desktop.gui.editor;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -73,12 +74,16 @@ public class EditorToolbar extends JPanel { //JToolBar {
   }
 
   public EditorToolbar(EditorPane pane, final TSInvoker invoker) {
-    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    setLayout(new BorderLayout()); //new BoxLayout(this, BoxLayout.X_AXIS));
+    
+
+    JPanel mainbar = GUIFactory.newRowPanel();
     
     this.setMinimumSize(new Dimension(1,60));
     
     pane_ = pane;
     final Button pointerBtn = new Button("*P*", "Pointer", new Action(ActionType.SELECT, Drawable.Type.values()));
+    mainbar.add(pointerBtn);
     
     JPanel selectablePanel = GUIFactory.newColumnPanel(); //new JPanel(new BorderLayout());
     JLabel selectableLabel = new JLabel("selectable:");
@@ -106,13 +111,13 @@ public class EditorToolbar extends JPanel { //JToolBar {
       }
     });
     
-    add(selectablePanel);
+    mainbar.add(selectablePanel);
     
-    add(Box.createHorizontalStrut(5));
+    mainbar.add(Box.createHorizontalStrut(5));
     
     new Button("Draw", "Draw Network", new Action(ActionType.DRAW_NETWORK, new Drawable.Type[] {Drawable.Type.ANCHOR_POINT}), 48);
     
-    add(Box.createHorizontalStrut(5));
+    mainbar.add(Box.createHorizontalStrut(5));
 
     // anchor tools
     Toolset anchorToolset = new Toolset("ANCHOR", "Anchor Tools");
@@ -120,9 +125,9 @@ public class EditorToolbar extends JPanel { //JToolBar {
     anchorToolset.addTool(new Action(ActionType.DELETE_ANCHOR_POINT, new Drawable.Type[] {Drawable.Type.ANCHOR_POINT}), "Delete");
     anchorToolset.addTool(new Action(ActionType.MERGE_ANCHOR_POINT, new Drawable.Type[] {Drawable.Type.ANCHOR_POINT}), "Merge");
 
-    add(anchorToolset);
+    mainbar.add(anchorToolset);
     
-    add(Box.createHorizontalStrut(5));
+    mainbar.add(Box.createHorizontalStrut(5));
 
     // anchor tools
     Toolset corridorToolset = new Toolset("CORRIDOR", "Corridor Tools");
@@ -130,12 +135,14 @@ public class EditorToolbar extends JPanel { //JToolBar {
     corridorToolset.addTool(new Action(ActionType.DELETE_CORRIDOR, new Drawable.Type[] {Drawable.Type.CORRIDOR}), "Delete");
     corridorToolset.addTool(new Action(ActionType.SPLIT_CORRIDOR, new Drawable.Type[] {Drawable.Type.CORRIDOR}), "Split");
 
-    add(corridorToolset);
+    mainbar.add(corridorToolset);
     
-    add(Box.createHorizontalStrut(5));
-    new Button("ML", "Modify Line", new Action(ActionType.MODIFY_LINE, new Drawable.Type[] {Drawable.Type.LINE}));
+    mainbar.add(Box.createHorizontalStrut(5));
+    
+    Button modifyLineBtn = new Button("ML", "Modify Line", new Action(ActionType.MODIFY_LINE, new Drawable.Type[] {Drawable.Type.LINE}));
+    mainbar.add(modifyLineBtn);
 
-    add(Box.createHorizontalStrut(5));
+    mainbar.add(Box.createHorizontalStrut(5));
     
     JLabel gridLabel = new JLabel("GRID");
     gridLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 10));
@@ -173,8 +180,9 @@ public class EditorToolbar extends JPanel { //JToolBar {
     gridPanel.add(gridLabel);
     gridPanel.add(gridButtonPanel);
 
-    add(gridPanel);
+    mainbar.add(gridPanel);
     
+    add(mainbar, BorderLayout.WEST);
     selectedAction_ = new Action(ActionType.SELECT);
   }
 
@@ -252,7 +260,7 @@ public class EditorToolbar extends JPanel { //JToolBar {
 
       setToolTipText(tipText);
       group_.add(this);
-      EditorToolbar.this.add(Button.this);
+      //EditorToolbar.this.add(Button.this);
 
       if(action != null) {
         addActionListener(new ActionListener() {

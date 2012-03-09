@@ -29,7 +29,7 @@ import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.apps.desktop.gui.editor.EditorToolbar;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
 
 /**
@@ -39,9 +39,9 @@ import org.transketch.core.network.Line;
 public class RemoveCorridorsFromLineCommand extends EditorBasedCommand implements TSAction {
 
   private Line line_;
-  private Corridor corridor_;
+  private NetworkCorridor corridor_;
 
-  public RemoveCorridorsFromLineCommand(Editor ed, Line line, Corridor corridor) {
+  public RemoveCorridorsFromLineCommand(Editor ed, Line line, NetworkCorridor corridor) {
     super(ed);
     line_ = line;
     corridor_ = corridor;

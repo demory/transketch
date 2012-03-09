@@ -28,7 +28,9 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.CorridorModel;
+import org.transketch.core.network.corridor.NetworkCorridor;
+import org.transketch.core.network.corridor.StylizedCorridorModel;
 
 /**
  *
@@ -36,31 +38,38 @@ import org.transketch.core.network.corridor.Corridor;
  */
 public class SetCorridorElbowAngleCommand extends EditorBasedCommand implements TSAction {
 
-  private Corridor corr_;
+  private NetworkCorridor corr_;
+  private StylizedCorridorModel model_;
   private double oldAngle_, angleR_;
 
-  public SetCorridorElbowAngleCommand(Editor ed, Corridor corr, double angleR) {
+  public SetCorridorElbowAngleCommand(Editor ed, NetworkCorridor corr, double angleR) {
     super(ed);
     corr_ = corr;
     angleR_ = angleR;
-    oldAngle_ = corr_.getElbowAngle();
+    //oldAngle_ = corr_.getElbowAngle();
   }
 
   @Override
   public boolean initialize() {
+    if(corr_.getModel().getType() != CorridorModel.Type.STYLIZED) return false;
+    model_ = (StylizedCorridorModel) corr_.getModel();
+    oldAngle_ = model_.getElbowAngle();    
     return angleR_ == 0 || (angleR_ >= Math.PI/2 && angleR_ <= (3.0/4.0)*Math.PI);
   }
 
+  @Override
   public boolean doThis(TranSketch ts) {
-    corr_.setElbowAngle(angleR_);
+    model_.setElbowAngle(angleR_);
     return true;
   }
 
+  @Override
   public boolean undoThis(TranSketch ts) {
-    corr_.setElbowAngle(oldAngle_);
+    model_.setElbowAngle(oldAngle_);
     return true;
   }
 
+  @Override
   public String getName() {
     return "Set Corridor Elbow Angle";
   }

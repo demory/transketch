@@ -33,8 +33,10 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.core.network.AnchorPoint;
-import org.transketch.core.network.corridor.Corridor;
+import org.transketch.core.network.corridor.NetworkCorridor;
 import org.transketch.core.network.Line;
+import org.transketch.core.network.corridor.CorridorModel;
+import org.transketch.core.network.corridor.StylizedCorridorModel;
 
 /**
  *
@@ -43,15 +45,15 @@ import org.transketch.core.network.Line;
 public class SplitCorridorCommand extends EditorBasedCommand implements TSAction {
   private final static Logger logger = Logger.getLogger(SplitCorridorCommand.class);
 
-  private Corridor initialCorr_, splitCorr1_, splitCorr2_;
+  private NetworkCorridor initialCorr_, splitCorr1_, splitCorr2_;
   private AnchorPoint point_;
   private double wx_, wy_;
 
-  private CreateCorridorCommand subCorr1Cmd_, subCorr2Cmd_;
+  private CreateStylizedCorridorCommand subCorr1Cmd_, subCorr2Cmd_;
   private DeleteCorridorCommand delCorrCmd_;
   private CreateAnchorPointCommand anchorPointCmd_;
 
-  public SplitCorridorCommand(Editor ed, Corridor corr, double wx, double wy) {
+  public SplitCorridorCommand(Editor ed, NetworkCorridor corr, double wx, double wy) {
     super(ed);
     initialCorr_ = corr;
     wx_ = wx; wy_ = wy;
@@ -64,18 +66,20 @@ public class SplitCorridorCommand extends EditorBasedCommand implements TSAction
   
   @Override
   public boolean initialize() {
-    if(initialCorr_ != null) return true;
-    initialCorr_ = ed_.getDocument().getNetwork().getCorridorAtXY(wx_, wy_,
-      ed_.getPane().getCanvas().getClickToleranceW());
-
-    return initialCorr_ != null;
+    if(initialCorr_ == null)
+      initialCorr_ = ed_.getDocument().getNetwork().getCorridorAtXY(wx_, wy_,
+        ed_.getPane().getCanvas().getClickToleranceW());
+    
+    if(initialCorr_ == null || initialCorr_.getModel().getType() != CorridorModel.Type.STYLIZED) return false;
+    
+    return true;
   }
   
   public boolean doThis(TranSketch ts) {
 
     boolean result = true;
     if(anchorPointCmd_ == null) {
-      Point2D pt = initialCorr_.nearestPoint(wx_, wy_);
+      Point2D pt = initialCorr_.getModel().nearestPoint(wx_, wy_);
       logger.debug(pt);
       anchorPointCmd_ = new CreateAnchorPointCommand(ed_, pt.getX(), pt.getY());
       // TODO: snap to grid
@@ -85,8 +89,9 @@ public class SplitCorridorCommand extends EditorBasedCommand implements TSAction
     point_ = anchorPointCmd_.getAnchorPoint();
 
     if(subCorr1Cmd_ == null) {
-      subCorr1Cmd_ = new CreateCorridorCommand(ed_, initialCorr_.fPoint(), point_, initialCorr_.getElbowAngle(), false);
-      subCorr2Cmd_ = new CreateCorridorCommand(ed_, point_, initialCorr_.tPoint(), initialCorr_.getElbowAngle(), false);
+      double elbowAngle = ((StylizedCorridorModel) initialCorr_.getModel()).getElbowAngle();
+      subCorr1Cmd_ = new CreateStylizedCorridorCommand(ed_, initialCorr_.fPoint(), point_, elbowAngle, false);
+      subCorr2Cmd_ = new CreateStylizedCorridorCommand(ed_, point_, initialCorr_.tPoint(), elbowAngle, false);
     }
 
     result = result & subCorr1Cmd_.doThis(ts);
