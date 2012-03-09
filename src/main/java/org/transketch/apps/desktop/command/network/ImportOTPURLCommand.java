@@ -45,7 +45,7 @@ public class ImportOTPURLCommand extends EditorBasedCommand {
   public boolean initialize() {
     if(url_ == null) {
       try {
-        url_ = new URL(JOptionPane.showInputDialog("URL:"));
+        url_ = new URL(JOptionPane.showInputDialog("URL:", "http://localhost:8080/opentripplanner-api-webapp/ws/shapes/routes"));
       } catch (MalformedURLException ex) {
         JOptionPane.showMessageDialog(null, "Malformed URL");
         return false;
@@ -63,6 +63,7 @@ public class ImportOTPURLCommand extends EditorBasedCommand {
       ts.getGUI().getControlFrameManager().getLinesFrame().addItem(line);
     ts.getGUI().getControlFrameManager().getLinesFrame().refreshList();
     ed_.getPane().setStatusText("");
+    ed_.getPane().repaint();
     return true;
   }
 }

@@ -157,8 +157,7 @@ public class OTPImporter {
         corridorLookup.put(i, corr);
         i++;
       }
-      System.out.println("corrStrMap count: "+corrStrMap.size());
-      
+     
       
       // create initial LineStyle
       
@@ -184,19 +183,19 @@ public class OTPImporter {
         if(routeIDs.contains(routeID)) continue;
         routeIDs.add(routeID);
         
-        //logger.debug("reading variant: "+variantName);
+        logger.debug("reading variant: "+variantName);
         
         Line line = new Line(id++, variantName);
         
         for(Integer edgeIndex : edgeList) {
           NetworkCorridor corr = corridorLookup.get(edgeIndex);
-          System.out.println(" - adding corr "+corr+" (index "+edgeIndex+")");
+          //logger.debug(" - adding corr "+corr+" (index "+edgeIndex+")");
           if(corr == null) {
-            System.out.println("    ** null corridor!");
+            logger.debug("null corridor: "+corr+" (index "+edgeIndex+")");
             continue;
           }
           if(line.size() > 0 && !corr.adjacentTo(line.endPoint()) && !corr.adjacentTo(line.startPoint())) {
-            System.out.println("    ** non-adjacency!");
+            logger.debug("non-adjacent corridor: "+corr+" (index "+edgeIndex+")");
             break;
           }
           
@@ -211,7 +210,6 @@ public class OTPImporter {
     } catch (Exception ex) {
       ex.printStackTrace();
     } 
-    System.out.println("done");
   }
   
  
