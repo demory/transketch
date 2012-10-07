@@ -47,6 +47,7 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.Editor;
 import org.transketch.apps.desktop.command.system.ExitCommand;
 import org.transketch.apps.desktop.gui.control.ControlFrameManager;
+import org.transketch.core.network.Bundler;
 import org.transketch.util.SysProps;
 
 /**
@@ -216,6 +217,7 @@ public class TranSketchGUI extends JFrame {
     frame.setSize(500,400);
     frame.setVisible(true);
     doc.setFrame(frame);
+    new Bundler(doc.getNetwork());
     frame.repaint();
   }
 
