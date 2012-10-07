@@ -65,12 +65,12 @@ public class AnchorBasedStop extends Stop {
 
   @Override
   public int getScreenX(MapCoordinates coords) {
-    return coords.xToScreen(getWorldX()) + (int) anchor_.getBundleOffset().getX();
+    return (int) (coords.xToScreen(getWorldX()) + anchor_.getBundleOffset().getX()/2);
   }
 
   @Override
   public int getScreenY(MapCoordinates coords) {
-    return coords.yToScreen(getWorldY()) - (int) anchor_.getBundleOffset().getY();    
+    return (int) (coords.yToScreen(getWorldY()) - (int) anchor_.getBundleOffset().getY()/2);    
   } 
   
   @Override

@@ -56,12 +56,14 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
 
     //logger.debug("axes size="+axes.size());
 
+    //if(stop_.id_ == 6) System.out.println("rr stop init");
     if(axes.size() == 1) {
       Bundle b1 = abStop.getAnchorPoint().getBundles().get(axes.get(0));
       int w1 = (b1 != null) ? b1.getWidth() : 0;
       Bundle b2 = abStop.getAnchorPoint().getBundles().get(axes.get(0)+180);
       int w2 = (b2 != null) ? b2.getWidth() : 0;
       width_ = Math.max(w1, w2);
+      //if(stop_.id_ == 6) System.out.println("rr stop width "+width_);
       height_ = radius_*2;
       rotR_ = -Math.toRadians(axes.get(0)+90);
     }
@@ -76,6 +78,8 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
   @Override
   public void drawStop(TSCanvas canvas) {
     Graphics2D g2d = canvas.getGraphics2D();
+    
+    //System.out.println("rr stop "+stop_.id_+", "+stop_.name_);
     //int x = canvas.getCoordinates().xToScreen(stop_.getWorldX());
     //int y = canvas.getCoordinates().yToScreen(stop_.getWorldY());
     int x = stop_.getScreenX(canvas.getCoordinates());
@@ -87,10 +91,10 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
     g2d.rotate(rotR_);
 
     g2d.setColor(template_.getBorderColor());
-    g2d.fillRoundRect((int) -width_/2 - bWeight, (int) -height_/2 - bWeight, (int) width_+2*bWeight, (int) height_+2*bWeight, (int) (radius_+bWeight)*2, (int) (radius_+bWeight)*2);
+    g2d.fillRoundRect((int) (-width_/2 - bWeight + 0.5f), (int) (-height_/2 - bWeight + 0.5f), (int) width_+2*bWeight, (int) height_+2*bWeight, (int) (radius_+bWeight)*2, (int) (radius_+bWeight)*2);
 
     g2d.setColor(template_.getFillColor());
-    g2d.fillRoundRect((int) -width_/2, (int) -height_/2, (int) width_, (int) height_, (int) radius_*2, (int) radius_*2);
+    g2d.fillRoundRect((int) (-width_/2 + 0.5f), (int) (-height_/2 + 0.5f), (int) width_, (int) height_, (int) radius_*2, (int) radius_*2);
 
     g2d.rotate(-rotR_);
     g2d.translate(-x, -y);
@@ -104,8 +108,11 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
     //logger.debug("s.gLA" +stop_.getLabelAngle());
     int sign = stop_.getLabelAngle() < Math.PI/2 || stop_.getLabelAngle() > 3*Math.PI/2 ? -1 : 1;
 
-    return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+sign*r2*Math.cos(rotR_),
-                              c.getCoordinates().yToScreen(stop_.getWorldY())+sign*r2*Math.sin(rotR_));
+    /*return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+sign*r2*Math.cos(rotR_),
+                              c.getCoordinates().yToScreen(stop_.getWorldY())+sign*r2*Math.sin(rotR_));*/
+
+    return new Point2D.Double(stop_.getScreenX(c.getCoordinates())+sign*r2*Math.cos(rotR_),
+                              stop_.getScreenY(c.getCoordinates())+sign*r2*Math.sin(rotR_));
   }
 
   @Override

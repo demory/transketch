@@ -119,6 +119,7 @@ public abstract class AbstractCorridor implements Drawable {
 
   public void draw(TSCanvas canvas) {
     draw(canvas, 0, 0, new LineStyleLayer(2, Color.gray));
+    //System.out.println("draw corr "+((Corridor) this).getID());
   }
 
   public void draw(TSCanvas canvas, int offsetFrom, int offsetTo, LineStyleLayer sstyle) { //int width, int offsetFrom, int offsetTo, Color color) {
@@ -130,6 +131,7 @@ public abstract class AbstractCorridor implements Drawable {
     g2d.setColor(sstyle.getColor());
     g2d.setStroke(sstyle.getStroke());
     g2d.draw(path);
+    //if(((Corridor) this).getID()==13) System.out.println("draw corr 13 - "+path.getCurrentPoint());
   }
 
   public void drawHighlight(TSCanvas canvas, Color color) {

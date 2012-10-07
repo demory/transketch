@@ -27,6 +27,7 @@ package org.transketch.core.network;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Path2D;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
 
@@ -53,14 +54,32 @@ public abstract class AbstractAnchorPoint implements Drawable {
   public void draw(TSCanvas canvas) {
     Graphics2D g2d = canvas.getGraphics2D();
 
-    int gx = canvas.getCoordinates().xToScreen(getX());
-    int gy = canvas.getCoordinates().yToScreen(getY());
+    //int gx = canvas.getCoordinates().xToScreen(getX());
+    //int gy = canvas.getCoordinates().yToScreen(getY());
+
+    double r = canvas.getCoordinates().dxToWorld(4);
+
+    Path2D horiz = new Path2D.Double();
+    horiz.moveTo(getX()+r, getY());
+    horiz.lineTo(getX()-r, getY());
+    
+    Path2D vert = new Path2D.Double();
+    vert.moveTo(getX(), getY()+r);
+    vert.lineTo(getX(), getY()-r);
+
+    vert.transform(canvas.getCoordinates().getScaleTransform());
+    vert.transform(canvas.getCoordinates().getTranslateTransform());
+
+    horiz.transform(canvas.getCoordinates().getScaleTransform());
+    horiz.transform(canvas.getCoordinates().getTranslateTransform());
 
     g2d.setColor(color_);
     g2d.setStroke(new BasicStroke(2));
 
-    g2d.drawLine(gx-4, gy, gx+4, gy);
-    g2d.drawLine(gx, gy-4, gx, gy+4);
+    g2d.draw(vert);
+    g2d.draw(horiz);
+    //g2d.drawLine(gx-4, gy, gx+4, gy);
+    //g2d.drawLine(gx, gy-4, gx, gy+4);
 
   }
 

@@ -27,6 +27,9 @@ package org.transketch.core.network.stop;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.core.network.Bundler.Bundle;
@@ -56,23 +59,42 @@ public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemp
   @Override
   public void drawStop(TSCanvas canvas) {
     Graphics2D g2d = canvas.getGraphics2D();
-    int x = stop_.getScreenX(canvas.getCoordinates()) - (int ) radius_;
-    int y = stop_.getScreenY(canvas.getCoordinates()) - (int ) radius_;
+    /*double x = stop_.getScreenX(canvas.getCoordinates()) - (int ) radius_; //+ 0.5f;
+    double y = stop_.getScreenY(canvas.getCoordinates()) - (int ) radius_; // + 0.5f;
     g2d.setColor(template_.getFillColor());
     int w = (int) radius_*2;
-    g2d.fillOval(x, y, w, w);
+    //g2d.fillOval
+    g2d.fillOval((int) x, (int) y, w, w);
     g2d.setColor(template_.getBorderColor());
     g2d.setStroke(new BasicStroke(template_.getBorderWeight()));
-    g2d.drawOval(x, y, w, w);
+    g2d.drawOval((int) x, (int) y, w, w);*/
+    double rs = canvas.getCoordinates().dxToWorld(radius_);
+    System.out.println("rs="+rs);
+    Ellipse2D e = new Ellipse2D.Double(stop_.getWorldX()-rs, stop_.getWorldY()-rs, rs*2, rs*2);
+    //e.transform(canvas.getCoordinates().getScaleTransform());
+    //e.transform(canvas.getCoordinates().getTranslateTransform());
+    Path2D p = new Path2D.Double(e);
+    p.transform(canvas.getCoordinates().getScaleTransform());
+    p.transform(canvas.getCoordinates().getTranslateTransform());
+    
+    g2d.setColor(template_.getFillColor());
+    g2d.fill(p);
+    g2d.setColor(template_.getBorderColor());
+    g2d.setStroke(new BasicStroke(template_.getBorderWeight()));
+    g2d.draw(p);
+
   }
 
   @Override
   public Point2D getLabelOrigin(TSCanvas c) {
 
-    double r2 = radius_ + 5; // default buffer
+    double r2 = radius_ + 4; // default buffer
 
-    return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+r2*Math.cos(-stop_.labelAngleR_),
-                              c.getCoordinates().yToScreen(stop_.getWorldY())+r2*Math.sin(-stop_.labelAngleR_));
+    /*return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+r2*Math.cos(-stop_.labelAngleR_),
+                              c.getCoordinates().yToScreen(stop_.getWorldY())+r2*Math.sin(-stop_.labelAngleR_));*/
+    
+    return new Point2D.Double(stop_.getScreenX(c.getCoordinates())+r2*Math.cos(-stop_.labelAngleR_),
+                              stop_.getScreenY(c.getCoordinates())+r2*Math.sin(-stop_.labelAngleR_));
   }
 
   public void drawHighlight(TSCanvas canvas, Color color) {
