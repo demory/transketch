@@ -48,7 +48,8 @@ public class LabelStyle {
 
   public LabelStyle() {
     //this("Default", new Font(Font.SANS_SERIF, Font.PLAIN, 14), 0);
-    this("Default", new Font("Calibri", Font.BOLD, 16), 0);
+    this("Default", new Font("DejaVu Sans Condensed", Font.BOLD, 14), 0);
+    
   }
 
   public Font getFont() {
