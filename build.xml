@@ -47,6 +47,17 @@
       <manifest>
          <attribute name="Main-Class" value="${main-class}"/>
       </manifest>
+      <zipfileset src="lib/jts-1.8.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/batik-dom.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/jmf.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/javaproj-1.0.4.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/jgraph.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/batik-svggen.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/batik-awt-util.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/jgrapht-jdk1.5.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/log4j-1.2.16.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/commons-io-2.0.1.jar" includes="**/*.java **/*.class"/>
+      <zipfileset src="lib/batik-util.jar" includes="**/*.java **/*.class"/>  
     </jar>
   </target>
 
