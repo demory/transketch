@@ -220,7 +220,7 @@ public class EditorCanvas extends Viewport {
           if(line.addCorridor(corr)) { // try adding single, presumably adjacent corridor
             logger.debug("single addition success");
             lineAdditionPath_ = Collections.singletonList(corr);
-            new Bundler(doc_.getNetwork());
+            doc_.getNetwork().rebundle();
             repaint = true;
           }
           else { // if adjacent corridor addition failed, look for path through network
@@ -232,7 +232,7 @@ public class EditorCanvas extends Viewport {
               for(Corridor c : lineAdditionPath_) success = success & line.addCorridor(c);
             }
             if(success) {
-              new Bundler(doc_.getNetwork());
+              doc_.getNetwork().rebundle();
               repaint = true;
             }
             else lineAdditionPath_ = null;
@@ -242,7 +242,7 @@ public class EditorCanvas extends Viewport {
       else if(line.size() != lineCorridors_.size()) {
         lineAdditionPath_ = null;
         restoreLine(line);
-        new Bundler(doc_.getNetwork());
+        doc_.getNetwork().rebundle();
         repaint = true;
       }
     }

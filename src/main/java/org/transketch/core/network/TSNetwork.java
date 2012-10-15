@@ -45,6 +45,7 @@ import org.transketch.apps.desktop.TSDocument;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.util.FPUtil;
 import org.jgrapht.graph.Pseudograph;
+import org.transketch.util.viewport.MapCoordinates;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

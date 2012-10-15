@@ -94,7 +94,7 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
     for(Stop stop : deletedStops_)
       net.deleteStop(stop);
     if(!affectedLines_.isEmpty())
-      new Bundler(ed_.getDocument().getNetwork());
+      ed_.getDocument().getNetwork().rebundle();
     return true;
   }
 
@@ -116,7 +116,7 @@ public class MergeAnchorPointCommand extends EditorBasedCommand implements TSAct
       entries.getKey().restoreAlignment(entries.getValue());
     }
     if(!affectedLines_.isEmpty())
-      new Bundler(ed_.getDocument().getNetwork());
+      ed_.getDocument().getNetwork().rebundle();
     return true;
   }
 

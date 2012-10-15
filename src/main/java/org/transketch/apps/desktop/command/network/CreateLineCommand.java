@@ -73,7 +73,7 @@ public class CreateLineCommand extends EditorBasedCommand implements TSAction {
     ed_.getDocument().getNetwork().addLine(line_);
     ts.getGUI().getControlFrameManager().getLinesFrame().addItem(line_);
     ed_.setSelectedLine(line_);
-    if(initCorr_ != null) new Bundler(ed_.getDocument().getNetwork());
+    if(initCorr_ != null) ed_.getDocument().getNetwork().rebundle();
     return true;
   }
 
@@ -83,7 +83,7 @@ public class CreateLineCommand extends EditorBasedCommand implements TSAction {
     ed_.getDocument().getNetwork().deleteLine(line_);
     ts.getGUI().getControlFrameManager().getLinesFrame().removeItem(line_);
     ed_.setSelectedLine(null);
-    if(initCorr_ != null) new Bundler(ed_.getDocument().getNetwork());
+    if(initCorr_ != null) ed_.getDocument().getNetwork().rebundle();
     return true;
   }
 

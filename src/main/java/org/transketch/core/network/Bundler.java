@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.core.network.stop.Stop;
 import org.transketch.util.FPUtil;
+import org.transketch.util.viewport.MapCoordinates;
 
 /**
  *
@@ -65,6 +66,7 @@ public class Bundler {
     assignOffsets(network);
     constructStraightaways(network);
     processStraightaways(network);
+    processAnchors(network);
   }
 
   public void initBundles(TSNetwork network) {
@@ -462,7 +464,7 @@ public class Bundler {
         }
       }
       if(needsAttention) {
-        //logger.debug(sa.toString()+ " needs attention");
+        logger.debug(sa.toString()+ " needs attention");
         if(sa.corridors_.size() == 1) {
           fixCorridor(sa.corridors_.get(0), sa.corridors_.get(0).fPoint());
         }
@@ -479,10 +481,10 @@ public class Bundler {
           }
 
           double offsetEnv[] = sa.getOffsetEnvelope();
-          //logger.debug("  Final range: "+offsetEnv[0]+" to "+offsetEnv[1]);
+          logger.debug("  Final range: "+offsetEnv[0]+" to "+offsetEnv[1]);
           double adjustment = -(offsetEnv[0]+offsetEnv[1])/2;
           if(adjustment != 0) {
-            //logger.debug("  Adjusting by "+adjustment);
+            logger.debug("  Adjusting by "+adjustment);
             pt = startPt;
             for(Corridor c : sa.corridors_) {
               bumpPointOut(pt, c, adjustment);
@@ -554,7 +556,7 @@ public class Bundler {
     String inTheta = (inBundle != null) ? ""+inBundle.theta_ : "n/a";
     String outTheta = (outBundle != null) ? ""+outBundle.theta_ : "n/a";
     
-    //logger.debug("bb "+pt.getID()+" "+inTheta+"-"+outTheta+" d"+delta);
+    if(pt.getID() == 3) logger.debug("bb "+pt.getID()+" "+inTheta+"-"+outTheta+" d="+delta);
     
     if(inBundle != null) {
       for(LineInfo l : inBundle.lines_) {
@@ -584,12 +586,6 @@ public class Bundler {
       }
     }
     
-    
-    double thetaR = inBundle != null ? Math.toRadians(inBundle.theta_) :
-            Math.toRadians(oppositeTheta(outBundle.theta_));
-    thetaR += Math.PI/2;
-    pt.applyBundleOffset(Math.cos(thetaR)*delta, Math.sin(thetaR)*delta);
-
     //logger.debug("   - bumped");
     //bumped_++;
   }
@@ -701,6 +697,12 @@ public class Bundler {
       return new LineInfo(line_, (dir_ == Direction.FORWARD ? Direction.BACKWARD : Direction.FORWARD), corr_);
     }
 
+    public double getOffset(AnchorPoint anchor) {
+      if(corr_.fPoint() == anchor) return line_.getCorridorInfo(corr_).offsetFrom_;
+      if(corr_.tPoint() == anchor) return line_.getCorridorInfo(corr_).offsetTo_;
+      return -1;
+    }
+    
     @Override
     public String toString() {
       return "line " + line_.getName() + "(#" + line_.getID() + " from "+line_.startPoint().getID()+") @ corr "+corr_.getID()+ " going " + dir_;
@@ -829,5 +831,101 @@ public class Bundler {
       }
       return new double[] {min,max};
     }
+  }
+  
+  private void processAnchors(TSNetwork network) {
+    //System.out.println("** PA **");
+    for(AnchorPoint anchor : network.getAnchorPoints()) {
+      //if(anchor.getID() != 10) continue;
+      //System.out.println("anchor="+anchor.getID());
+      Map<Integer, Set<Double>> offsets = new HashMap<Integer, Set<Double>>();
+
+      for(Map.Entry<Integer, Bundle> entry : anchor.getBundles().entrySet()) {
+        Bundle bundle = entry.getValue();
+        int theta = entry.getKey();
+
+        for(LineInfo li : bundle.lines_) {
+
+          double offset = li.getOffset(anchor);
+          int rotTheta = this.rotateTheta(theta, (li.corr_.fPoint()==anchor ? -90 : 90));
+
+          if(!offsets.containsKey(rotTheta)) {
+            offsets.put(rotTheta, new HashSet<Double>());
+          }
+          offsets.get(rotTheta).add(offset);
+
+        }
+      }
+
+      Map<Integer, Double> meanOffsets = new HashMap<Integer, Double>();
+      List<Line2D> lines = new ArrayList<Line2D>();
+      for(int rt : offsets.keySet()) {
+        //System.out.println("rt="+rt);
+        double maxOffset = 0, minOffset = Double.MAX_VALUE;
+
+        for(double offset : offsets.get(rt)) {
+          //System.out.println(" - "+offset);
+          minOffset = Math.min(minOffset, offset);
+          maxOffset = Math.max(maxOffset, offset);
+        }
+        double meanOffset = (minOffset+maxOffset)/2;
+        //System.out.println(" * mean="+meanOffset);
+
+        int oppTheta = this.oppositeTheta(rt);
+        if(meanOffsets.containsKey(oppTheta) && meanOffsets.get(oppTheta)==meanOffset) {
+          //System.out.println("  > equivalent already exists");
+        }
+        else {
+          meanOffsets.put(rt, meanOffset);
+
+          double rtRad = Math.toRadians(rt);
+
+
+          //double meanOffsetW = coords.dxToWorld(meanOffset);
+
+          double x1 = anchor.getX()+meanOffset*Math.cos(rtRad);
+          double y1 = anchor.getY()+meanOffset*Math.sin(rtRad);
+          double x2 = x1 + Math.cos(rtRad+Math.PI/2);
+          double y2 = y1 + Math.sin(rtRad+Math.PI/2);            
+
+          Line2D line = new Line2D.Double(x1, y1, x2, y2);
+          //System.out.println("  > creating line "+x1+","+y1+" to "+x2+","+y2);
+          lines.add(line);
+        }
+      }
+      anchor.clearBundleOffsets();
+      if(lines.size()==1) {
+        //System.out.println("adding offset: "+lines.get(0).getP1());
+        anchor.addBundleOffset(new Point2D.Double(lines.get(0).getP1().getX()-anchor.getX(), lines.get(0).getP1().getY()-anchor.getY()));
+      } 
+      else {
+        // compare each line-line pairing
+        for(int a = 0; a < lines.size(); a++) {
+          for(int b = a+1; b < lines.size(); b++) {
+            //System.out.println("comparing "+a+" and "+b);
+            Point2D isect = FPUtil.lineLineIntersection(lines.get(a), lines.get(b));
+            //System.out.println(" isect="+isect.toString());
+            if(isect != null) {
+              Point2D.Double isectOffset = new Point2D.Double(isect.getX()-anchor.getX(), isect.getY()-anchor.getY());
+              //System.out.println(" isectOffset="+isectOffset.toString());
+              anchor.addBundleOffset(isectOffset);
+            }
+            else {
+              //System.out.println(" non-intersection!");
+              anchor.addBundleOffset(new Point2D.Double(lines.get(a).getP1().getX()-anchor.getX(), lines.get(a).getP1().getY()-anchor.getY()));
+              anchor.addBundleOffset(new Point2D.Double(lines.get(b).getP1().getX()-anchor.getX(), lines.get(b).getP1().getY()-anchor.getY()));
+            }
+          }
+        }
+      }
+      anchor.computeOffsetCenter();
+    }
+  }
+  
+  public int rotateTheta(int theta, int rotateBy) {
+    theta += rotateBy;
+    if(theta < 0) theta += 360;
+    if(theta >= 360) theta -= 360;
+    return theta;
   }
 }

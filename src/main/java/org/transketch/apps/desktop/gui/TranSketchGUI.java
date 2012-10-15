@@ -217,7 +217,7 @@ public class TranSketchGUI extends JFrame {
     frame.setSize(500,400);
     frame.setVisible(true);
     doc.setFrame(frame);
-    new Bundler(doc.getNetwork());
+    doc.getNetwork().rebundle();
     frame.repaint();
   }
 

@@ -40,7 +40,7 @@ public class RebundleCommand extends EditorBasedCommand {
   }
 
   public boolean doThis(TranSketch ts) {
-    new Bundler(ed_.getDocument().getNetwork());
+    ed_.getDocument().getNetwork().rebundle();
     ed_.getPane().getCanvas().repaint();
     return true;
   }

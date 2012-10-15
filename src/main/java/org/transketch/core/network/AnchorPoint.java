@@ -47,7 +47,10 @@ public class AnchorPoint extends AbstractAnchorPoint {
 
   private Map<Integer, Bundle> bundleMap_ = new HashMap<Integer, Bundle>();
   private Set<Integer> bundleAxes_ = new HashSet<Integer>();
-  private Point2D.Double bundleOffset_ = new Point2D.Double(0, 0);
+  //private Point2D.Double bundleOffset_ = new Point2D.Double(0, 0);
+  
+  private Set<Point2D.Double> bundleOffsets_ = new HashSet<Point2D.Double>();
+  private Point2D.Double offsetCenter_;
 
   public AnchorPoint(int id, double x, double y) {
     super(Color.BLACK);
@@ -89,7 +92,7 @@ public class AnchorPoint extends AbstractAnchorPoint {
   public void clearBundlerData() {
     bundleMap_ = new HashMap<Integer, Bundle>();
     bundleAxes_ = new HashSet<Integer>();
-    bundleOffset_ = new Point2D.Double(0, 0);
+    clearBundleOffsets();
   }
   
   public Map<Integer, Bundle> getBundles() {
@@ -112,14 +115,41 @@ public class AnchorPoint extends AbstractAnchorPoint {
     return bundleAxes_;
   }
 
-  public void applyBundleOffset(double dx, double dy) {
-    //logger.debug("aBO "+id_+": "+dx+","+dy);
+  /*public void applyBundleOffset(double dx, double dy) {
+    if(id_ == 3) logger.debug("aBO "+id_+": "+dx+","+dy);
     bundleOffset_.setLocation(bundleOffset_.x + dx, bundleOffset_.y + dy);
+  }*/
+  
+  public void clearBundleOffsets() {
+    bundleOffsets_ = new HashSet<Point2D.Double>();
+  }
+
+  public void addBundleOffset(Point2D.Double offset) {
+    bundleOffsets_.add(offset);
   }
   
-  public Point2D getBundleOffset() {
-    return bundleOffset_;
+  public void computeOffsetCenter() {
+    if(bundleOffsets_ == null || bundleOffsets_.size() == 0) {
+      offsetCenter_ = new Point2D.Double(0,0);
+      return;
+    }
+    
+    double totalX = 0, totalY = 0;
+    for(Point2D pt : bundleOffsets_) {
+      totalX += pt.getX();
+      totalY += pt.getY();
+    }
+    
+    offsetCenter_ = new Point2D.Double(totalX/bundleOffsets_.size(), totalY/bundleOffsets_.size());
   }
+  
+  public Point2D.Double getOffsetCenter() {
+    return offsetCenter_;
+  }
+  
+  /*public Point2D getBundleOffset() {
+    return bundleOffset_;
+  }*/
   
   public Point2D.Double getPoint2D() {
     return point_;

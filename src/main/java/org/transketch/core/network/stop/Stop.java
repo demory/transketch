@@ -25,6 +25,7 @@
 package org.transketch.core.network.stop;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Map;
@@ -153,6 +154,8 @@ public abstract class Stop implements Drawable {
   public abstract int getScreenX(MapCoordinates coords);
 
   public abstract int getScreenY(MapCoordinates coords);
+  
+  public abstract Point2D getScreenOffset();
   
   public abstract Collection<Corridor> getCorridors();
 

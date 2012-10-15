@@ -24,6 +24,7 @@
 
 package org.transketch.core.network.stop;
 
+import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Map;
 import org.transketch.core.network.AnchorPoint;
@@ -62,17 +63,22 @@ public class AnchorBasedStop extends Stop {
   public double getWorldY() {
     return anchor_.getY();
   }
-
+  
   @Override
   public int getScreenX(MapCoordinates coords) {
-    return (int) (coords.xToScreen(getWorldX()) + anchor_.getBundleOffset().getX()/2);
+    return (int) coords.xToScreen(getWorldX());
   }
 
   @Override
   public int getScreenY(MapCoordinates coords) {
-    return (int) (coords.yToScreen(getWorldY()) - (int) anchor_.getBundleOffset().getY()/2);    
+    return (int) coords.yToScreen(getWorldY());    
   } 
   
+  @Override
+  public Point2D getScreenOffset() {
+    return anchor_.getOffsetCenter();
+  }
+
   @Override
   public Collection<Corridor> getCorridors() {
     return anchor_.getCorridors();
