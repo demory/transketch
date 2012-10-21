@@ -193,12 +193,14 @@ public abstract class Stop implements Drawable {
     }
   }
 
+  @Override
   public void draw(TSCanvas c) {
     renderer_.initialize();
     renderer_.drawStop(c);
     if(showLabel_) renderer_.drawLabel(c);
   }
 
+  @Override
   public void drawHighlight(TSCanvas canvas, Color color) {
     renderer_.initialize();
     renderer_.drawHighlight(canvas, color);

@@ -89,19 +89,30 @@ public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemp
                               stop_.getScreenY(c.getCoordinates()) - stop_.getScreenOffset().getY() + r2*Math.sin(-stop_.labelAngleR_));
   }
 
+  @Override
   public void drawHighlight(TSCanvas canvas, Color color) {
     Graphics2D g2d = canvas.getGraphics2D();
-    int x = stop_.getScreenX(canvas.getCoordinates()) - (int ) radius_ - 6;
-    int y = stop_.getScreenY(canvas.getCoordinates()) - (int ) radius_ - 6;
-    g2d.setColor(color);
-    int w = (int) radius_*2 + 8;
-    g2d.fillOval(x, y, w, w);
+    
+    double rs = canvas.getCoordinates().dxToWorld(radius_ + 5);
+    Ellipse2D e = new Ellipse2D.Double(stop_.getWorldX() - rs, stop_.getWorldY() - rs, rs * 2, rs * 2);
+    Path2D p = new Path2D.Double(e);
+    p.transform(canvas.getCoordinates().getScaleTransform());
+    p.transform(canvas.getCoordinates().getTranslateTransform());
 
+    Point2D offset = stop_.getScreenOffset();
+    if (offset != null) {
+      p.transform(AffineTransform.getTranslateInstance(offset.getX(), -offset.getY()));
+    }
+
+    g2d.setColor(color);
+    g2d.fill(p);
   }
 
   public boolean containsPoint(TSCanvas c, double wx, double wy) {
     Point2D pt = new Point2D.Double(c.getCoordinates().xToScreen(wx), c.getCoordinates().yToScreen(wy));
-    return (pt.distance(c.getCoordinates().xToScreen(stop_.getWorldX()), c.getCoordinates().yToScreen(stop_.getWorldY())) < radius_);
+    //return (pt.distance(c.getCoordinates().xToScreen(stop_.getWorldX()), c.getCoordinates().yToScreen(stop_.getWorldY())) < radius_);
+    return (pt.distance(stop_.getScreenX(c.getCoordinates()) + stop_.getScreenOffset().getX(),
+                        stop_.getScreenY(c.getCoordinates()) - stop_.getScreenOffset().getY()) < radius_);
   }
 
 }
