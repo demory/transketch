@@ -24,6 +24,7 @@
 
 package org.transketch.core.network.stop;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -82,20 +83,25 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
     //System.out.println("rr stop "+stop_.id_+", "+stop_.name_);
     //int x = canvas.getCoordinates().xToScreen(stop_.getWorldX());
     //int y = canvas.getCoordinates().yToScreen(stop_.getWorldY());
-    int x = stop_.getScreenX(canvas.getCoordinates());
-    int y = stop_.getScreenY(canvas.getCoordinates());
+    double x = stop_.getScreenX(canvas.getCoordinates()) + stop_.getScreenOffset().getX();
+    double y = stop_.getScreenY(canvas.getCoordinates()) - stop_.getScreenOffset().getY();
 
-    int bWeight = template_.getBorderWeight();
+    //int bWeight = template_.getBorderWeight();
 
     g2d.translate(x, y);
     g2d.rotate(rotR_);
 
-    g2d.setColor(template_.getBorderColor());
-    g2d.fillRoundRect((int) (-width_/2 - bWeight + 0.5f), (int) (-height_/2 - bWeight + 0.5f), (int) width_+2*bWeight, (int) height_+2*bWeight, (int) (radius_+bWeight)*2, (int) (radius_+bWeight)*2);
+    //g2d.setColor(template_.getBorderColor());
+    //g2d.fillRoundRect((int) (-width_/2 - bWeight + 0.5f), (int) (-height_/2 - bWeight + 0.5f), (int) width_+2*bWeight, (int) height_+2*bWeight, (int) (radius_+bWeight)*2, (int) (radius_+bWeight)*2);
 
     g2d.setColor(template_.getFillColor());
     g2d.fillRoundRect((int) (-width_/2 + 0.5f), (int) (-height_/2 + 0.5f), (int) width_, (int) height_, (int) radius_*2, (int) radius_*2);
 
+    g2d.setColor(template_.getBorderColor());
+    g2d.setStroke(new BasicStroke(template_.getBorderWeight()));
+    g2d.drawRoundRect((int) (-width_/2 + 0.5f), (int) (-height_/2 + 0.5f), (int) width_, (int) height_, (int) radius_*2, (int) radius_*2);
+
+    
     g2d.rotate(-rotR_);
     g2d.translate(-x, -y);
 
@@ -111,15 +117,15 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
     /*return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+sign*r2*Math.cos(rotR_),
                               c.getCoordinates().yToScreen(stop_.getWorldY())+sign*r2*Math.sin(rotR_));*/
 
-    return new Point2D.Double(stop_.getScreenX(c.getCoordinates())+sign*r2*Math.cos(rotR_),
-                              stop_.getScreenY(c.getCoordinates())+sign*r2*Math.sin(rotR_));
+    return new Point2D.Double(stop_.getScreenX(c.getCoordinates())+sign*r2*Math.cos(rotR_) + stop_.getScreenOffset().getX(),
+                              stop_.getScreenY(c.getCoordinates())+sign*r2*Math.sin(rotR_) - stop_.getScreenOffset().getY());
   }
 
   @Override
   public void drawHighlight(TSCanvas canvas, Color color) {
     Graphics2D g2d = canvas.getGraphics2D();
-    int x = canvas.getCoordinates().xToScreen(stop_.getWorldX());
-    int y = canvas.getCoordinates().yToScreen(stop_.getWorldY());
+    double x = canvas.getCoordinates().xToScreen(stop_.getWorldX()) + stop_.getScreenOffset().getX();
+    double y = canvas.getCoordinates().yToScreen(stop_.getWorldY()) - stop_.getScreenOffset().getY();
 
     int bWeight = template_.getBorderWeight();
 
@@ -127,7 +133,9 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
     g2d.rotate(rotR_);
 
     g2d.setColor(color);
-    g2d.fillRoundRect((int) -width_/2 - bWeight-3, (int) -height_/2 - bWeight-3, (int) width_+2*bWeight+6, (int) height_+2*bWeight+6, (int) (radius_+bWeight+3)*2, (int) (radius_+bWeight+3)*2);
+    //g2d.fillRoundRect((int) -width_/2 - bWeight-3, (int) -height_/2 - bWeight-3, (int) width_+2*bWeight+6, (int) height_+2*bWeight+6, (int) (radius_+bWeight+3)*2, (int) (radius_+bWeight+3)*2);
+    int buffer = 3;
+    g2d.fillRoundRect((int) (-width_/2 + 0.5f) - buffer, (int) (-height_/2 + 0.5f) - buffer, (int) width_+buffer*2, (int) height_+buffer*2, (int) (radius_+buffer)*2, (int) (radius_+buffer)*2);
 
     g2d.rotate(-rotR_);
     g2d.translate(-x, -y);
@@ -136,7 +144,8 @@ public class RoundedRectRenderer extends StopRenderer<FilledBorderedShapeRendere
 
   @Override
   public boolean containsPoint(TSCanvas c, double wx, double wy) {
-    Point2D.Double srcPt = new Point2D.Double(wx -  stop_.getWorldX(), wy - stop_.getWorldY());
+    Point2D.Double srcPt = new Point2D.Double(wx - stop_.getWorldX() - c.getCoordinates().dxToWorld(stop_.getScreenOffset().getX()),
+                                              wy - stop_.getWorldY() + c.getCoordinates().dyToWorld(stop_.getScreenOffset().getY()));
     Point2D.Double dstPt = new Point2D.Double();
     AffineTransform at = AffineTransform.getRotateInstance(rotR_);
     at.transform(srcPt, dstPt);
