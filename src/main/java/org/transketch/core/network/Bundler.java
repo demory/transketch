@@ -699,7 +699,7 @@ public class Bundler {
 
     public double getOffset(AnchorPoint anchor) {
       if(corr_.fPoint() == anchor) return line_.getCorridorInfo(corr_).offsetFrom_;
-      if(corr_.tPoint() == anchor) return line_.getCorridorInfo(corr_).offsetTo_;
+      if(corr_.tPoint() == anchor) return -line_.getCorridorInfo(corr_).offsetTo_;
       return -1;
     }
     
@@ -836,18 +836,24 @@ public class Bundler {
   private void processAnchors(TSNetwork network) {
     //System.out.println("** PA **");
     for(AnchorPoint anchor : network.getAnchorPoints()) {
-      //if(anchor.getID() != 10) continue;
+      /*if(anchor.getID() != 54) {
+        anchor.addBundleOffset(new Point2D.Double(0,0));
+        anchor.computeOffsetCenter();
+        continue;
+      }*/
       //System.out.println("anchor="+anchor.getID());
       Map<Integer, Set<Double>> offsets = new HashMap<Integer, Set<Double>>();
 
       for(Map.Entry<Integer, Bundle> entry : anchor.getBundles().entrySet()) {
         Bundle bundle = entry.getValue();
+        //System.out.println(" b: "+bundle.theta_);
         int theta = entry.getKey();
 
         for(LineInfo li : bundle.lines_) {
 
           double offset = li.getOffset(anchor);
-          int rotTheta = this.rotateTheta(theta, (li.corr_.fPoint()==anchor ? -90 : 90));
+          int rotTheta = this.rotateTheta(theta, -90);//(li.corr_.fPoint()==anchor ? -90 : 90));
+          //System.out.println("   * li: "+li.toString()+" offset="+offset+ " rt="+rotTheta);
 
           if(!offsets.containsKey(rotTheta)) {
             offsets.put(rotTheta, new HashSet<Double>());
@@ -861,7 +867,7 @@ public class Bundler {
       List<Line2D> lines = new ArrayList<Line2D>();
       for(int rt : offsets.keySet()) {
         //System.out.println("rt="+rt);
-        double maxOffset = 0, minOffset = Double.MAX_VALUE;
+        double maxOffset = -Double.MAX_VALUE, minOffset = Double.MAX_VALUE;
 
         for(double offset : offsets.get(rt)) {
           //System.out.println(" - "+offset);
@@ -872,7 +878,7 @@ public class Bundler {
         //System.out.println(" * mean="+meanOffset);
 
         int oppTheta = this.oppositeTheta(rt);
-        if(meanOffsets.containsKey(oppTheta) && meanOffsets.get(oppTheta)==meanOffset) {
+        if(meanOffsets.containsKey(oppTheta) && -meanOffsets.get(oppTheta)==meanOffset) {
           //System.out.println("  > equivalent already exists");
         }
         else {

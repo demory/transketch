@@ -63,11 +63,7 @@ public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemp
     p.transform(canvas.getCoordinates().getScaleTransform());
     p.transform(canvas.getCoordinates().getTranslateTransform());
     
-    Point2D offset = stop_.getScreenOffset();
-    if(offset != null) {
-      //System.out.println("offsetCenter="+offset);
-      p.transform(AffineTransform.getTranslateInstance(offset.getX(), -offset.getY()));
-    }
+    p.transform(AffineTransform.getTranslateInstance(stop_.getScreenOffset().getX(), -stop_.getScreenOffset().getY()));
     
     g2d.setColor(template_.getFillColor());
     g2d.fill(p);
@@ -82,9 +78,6 @@ public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemp
 
     double r2 = radius_ + 4; // default buffer
 
-    /*return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX())+r2*Math.cos(-stop_.labelAngleR_),
-                              c.getCoordinates().yToScreen(stop_.getWorldY())+r2*Math.sin(-stop_.labelAngleR_));*/
-    
     return new Point2D.Double(stop_.getScreenX(c.getCoordinates()) + stop_.getScreenOffset().getX() + r2*Math.cos(-stop_.labelAngleR_),
                               stop_.getScreenY(c.getCoordinates()) - stop_.getScreenOffset().getY() + r2*Math.sin(-stop_.labelAngleR_));
   }
@@ -99,10 +92,7 @@ public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemp
     p.transform(canvas.getCoordinates().getScaleTransform());
     p.transform(canvas.getCoordinates().getTranslateTransform());
 
-    Point2D offset = stop_.getScreenOffset();
-    if (offset != null) {
-      p.transform(AffineTransform.getTranslateInstance(offset.getX(), -offset.getY()));
-    }
+    p.transform(AffineTransform.getTranslateInstance(stop_.getScreenOffset().getX(), -stop_.getScreenOffset().getY()));
 
     g2d.setColor(color);
     g2d.fill(p);
@@ -110,7 +100,6 @@ public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemp
 
   public boolean containsPoint(TSCanvas c, double wx, double wy) {
     Point2D pt = new Point2D.Double(c.getCoordinates().xToScreen(wx), c.getCoordinates().yToScreen(wy));
-    //return (pt.distance(c.getCoordinates().xToScreen(stop_.getWorldX()), c.getCoordinates().yToScreen(stop_.getWorldY())) < radius_);
     return (pt.distance(stop_.getScreenX(c.getCoordinates()) + stop_.getScreenOffset().getX(),
                         stop_.getScreenY(c.getCoordinates()) - stop_.getScreenOffset().getY()) < radius_);
   }
