@@ -31,6 +31,7 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.json.simple.JSONObject;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.Line;
 import org.transketch.util.FPUtil;
@@ -214,6 +215,14 @@ public class Corridor extends AbstractCorridor {
     return "<corridor id=\""+id_+"\" fpoint=\""+fPoint_.getID()+"\" tpoint=\""+tPoint_.getID()+"\" theta=\""+thetaR_+"\" />\n";
   }
 
+  public JSONObject getJSON() {
+    JSONObject json = new JSONObject();
+    json.put("id", id_);
+    json.put("fPoint", fPoint_.getID());
+    json.put("tPoint", tPoint_.getID());
+    return json;
+  }
+  
   @Override
   public String toString() {
     return "Corridor "+id_+" (Anchors "+fPoint_.getID()+" to "+tPoint_.getID()+")";

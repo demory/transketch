@@ -45,6 +45,8 @@ import org.transketch.apps.desktop.TSDocument;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.util.FPUtil;
 import org.jgrapht.graph.Pseudograph;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.transketch.util.viewport.MapCoordinates;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -614,5 +616,23 @@ public class TSNetwork {
     return xml;
   }
 
+  public JSONObject getJSON() {
+    
+    JSONObject json = new JSONObject();
+    
+    JSONArray points = new JSONArray();
+    for(AnchorPoint pt : points_.values()) {
+      points.add(pt.getJSON());
+    }
+    json.put("AnchorPoints", points);
+    
+    JSONArray corridors = new JSONArray();
+    for(Corridor corr : corridors_.values()) {
+      corridors.add(corr.getJSON());
+    }
+    json.put("Corridors", corridors);
+    
+    return json;
+  }
 
 }

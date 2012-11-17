@@ -78,6 +78,7 @@ public class MenuBar extends JMenuBar {
     JMenu exportMenu = new JMenu("Export...");
     newMenuItem(exportMenu, "PNG", CommandFactory.Key.FILE_EXPORT_PNG);
     newMenuItem(exportMenu, "SVG", CommandFactory.Key.FILE_EXPORT_SVG);
+    newMenuItem(exportMenu, "Web Package", CommandFactory.Key.FILE_EXPORT_WEB);
     fileMenu.add(exportMenu);
     fileMenu.addSeparator();
     newMenuItem(fileMenu, "Exit", CommandFactory.Key.FILE_EXIT);

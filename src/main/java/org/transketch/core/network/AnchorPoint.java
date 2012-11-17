@@ -30,6 +30,7 @@ import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
 import java.util.*;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.transketch.core.network.Bundler.Bundle;
 import org.transketch.core.network.corridor.Corridor;
 
@@ -159,6 +160,14 @@ public class AnchorPoint extends AbstractAnchorPoint {
     return "<point id=\""+id_+"\" x=\""+point_.x+"\" y=\""+point_.y+"\" />\n";
   }
 
+  public JSONObject getJSON() {
+    JSONObject json = new JSONObject();
+    json.put("id", id_);
+    json.put("x", point_.x);
+    json.put("y", point_.y);
+    return json;
+  }
+  
   @Override
   public String toString() {
     DecimalFormat df = new DecimalFormat("#.###");

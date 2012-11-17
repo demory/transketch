@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 import org.transketch.apps.desktop.gui.DocumentFrame;
 import org.transketch.core.network.TSNetwork;
 import org.transketch.core.network.Line;
@@ -221,6 +222,19 @@ public class TSDocument {
       logger.error("error writing svg", ex);
     }
 
+  }
+  
+  public void writeJSONFile(File file) {
+    JSONObject json = network_.getJSON();
+
+    try {
+      FileWriter writer = new FileWriter(file);
+      writer.write(json.toJSONString());
+      writer.close();
+    } catch(Exception e) {
+      logger.error("error writing json", e);
+    }    
+    
   }
 
   public class ImageCanvas implements TSCanvas {

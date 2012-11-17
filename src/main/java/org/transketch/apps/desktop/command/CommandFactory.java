@@ -27,13 +27,7 @@ package org.transketch.apps.desktop.command;
 import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.command.edit.RedoCommand;
 import org.transketch.apps.desktop.command.edit.UndoCommand;
-import org.transketch.apps.desktop.command.file.ClearRecentFilesCommand;
-import org.transketch.apps.desktop.command.file.ExportPNGCommand;
-import org.transketch.apps.desktop.command.file.ExportSVGCommand;
-import org.transketch.apps.desktop.command.file.LoadFileCommand;
-import org.transketch.apps.desktop.command.file.NewFileCommand;
-import org.transketch.apps.desktop.command.file.SaveFileAsCommand;
-import org.transketch.apps.desktop.command.file.SaveFileCommand;
+import org.transketch.apps.desktop.command.file.*;
 import org.transketch.apps.desktop.command.network.CreateLineCommand;
 import org.transketch.apps.desktop.command.network.RebundleCommand;
 import org.transketch.apps.desktop.command.system.DebugActionCommand;
@@ -55,7 +49,7 @@ public class CommandFactory {
   public enum Key {
 
     // Menu keys:
-    FILE_NEW, FILE_LOAD, FILE_SAVE, FILE_SAVE_AS, FILE_EXPORT_PNG, FILE_EXPORT_SVG, FILE_EXIT, FILE_CLEAR_RECENT,
+    FILE_NEW, FILE_LOAD, FILE_SAVE, FILE_SAVE_AS, FILE_EXPORT_PNG, FILE_EXPORT_SVG, FILE_EXPORT_WEB, FILE_EXIT, FILE_CLEAR_RECENT,
     EDIT_UNDO, EDIT_REDO,
     TOOLS_REBUNDLE,
     HELP_ABOUT,
@@ -82,6 +76,7 @@ public class CommandFactory {
       case FILE_SAVE_AS: return new SaveFileAsCommand(ts_.getActiveEditor());
       case FILE_EXPORT_PNG: return new ExportPNGCommand(ts_.getActiveEditor());
       case FILE_EXPORT_SVG: return new ExportSVGCommand(ts_.getActiveEditor());
+      case FILE_EXPORT_WEB: return new ExportWebPackageCommand(ts_.getActiveEditor());
       case FILE_CLEAR_RECENT: return new ClearRecentFilesCommand();
       case FILE_EXIT: return new ExitCommand();
       case EDIT_UNDO: return new UndoCommand(ts_.getActiveEditor());

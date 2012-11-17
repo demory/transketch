@@ -44,7 +44,6 @@ public class DebugActionCommand extends EditorBasedCommand {
 
   public boolean doThis(TranSketch ts) {
     logger.debug("running debug action");
-    for(Corridor c: ed_.getDocument().getNetwork().getCorridors()) c.flip();
     return false;
   }
 
