@@ -24,7 +24,6 @@
 
 package org.transketch.core.network.corridor;
 
-import org.transketch.core.network.corridor.AbstractCorridor;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -34,6 +33,7 @@ import java.util.Set;
 import org.json.simple.JSONObject;
 import org.transketch.core.network.AnchorPoint;
 import org.transketch.core.network.Line;
+import org.transketch.core.network.Line.CorridorInfo;
 import org.transketch.util.FPUtil;
 import org.transketch.util.viewport.MapCoordinates;
 
@@ -230,5 +230,15 @@ public class Corridor extends AbstractCorridor {
 
   public boolean sharesEndpointsWith(Corridor corr) {
     return (fPoint_ == corr.fPoint_ && tPoint_ == corr.tPoint()) || (fPoint_ == corr.tPoint_ && tPoint_ == corr.fPoint());
+  }
+
+  public void calculateAverageOffset() {
+    double total = 0, count = 0;
+    for(Line line : lines_) {
+      CorridorInfo ci = line.getCorridorInfo(this);
+      total += (ci.offsetFrom_ + ci.offsetTo_)/2;
+      count++;      
+    }
+    avgOffset_ = total/count;
   }
 }

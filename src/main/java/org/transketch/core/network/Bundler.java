@@ -37,13 +37,40 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.transketch.core.network.Line.CorridorInfo;
 import org.transketch.core.network.stop.AnchorBasedStop;
 import org.transketch.core.network.stop.Stop;
 import org.transketch.util.FPUtil;
-import org.transketch.util.viewport.MapCoordinates;
 
 /**
+ *  The job of the Bundler is to assign offsets to each line used to render
+ *  them as "bundles" of adjacent, non-overlapping strokes, ordered to keep
+ *  crossings to a minimum.
+ * 
+ *  Offsets are stored in CorridorInfo objects; one such object exists for for
+ *  each corridor in any line, and contains the offsets for the start and end
+ *  of that corridor. **Offsets are relative to corridor (not line) direction**
+ * 
+ *  Consider the following example with a simple network consisting of three
+ *  anchor points (A, B, and C) and corridors x and y connecting A to B and
+ *  C to B, respectively. Two lines, each to be rendered with a 10px stroke,
+ *  exist: Line 1, containing (in order) corridors x (as a "forward" corridor)
+ *  and Line 2 (as a "backward" corridor, since the direction of the lines is
+ *  opposite that of the corridor), and line 2, which consists only of 
+ *  corridor x. The assigned offsets would be:
+ *  
+ *  Line 1:
+ *   - Corridor x: offsetFrom (i.e., point A) = -5, offsetTo (pt B) = -5
+ *   - Corridoy y: offsetFrom (pt C) = 5, offsetTp (pt b) = 5
  *
+ *  Line 2:
+ *   - Corridor x: offsetFrom (pt A) = 5, offsetTo (pt B) = 5
+ * 
+ *         A     x->   B    <-y    C 
+ *  Line 1 |-----------|-----------|
+ *  Line 2 |-----------|
+ * 
+ *   
  * @author demory
  */
 public class Bundler {
@@ -67,6 +94,8 @@ public class Bundler {
     constructStraightaways(network);
     processStraightaways(network);
     processAnchors(network);
+    processCorridors(network);
+    //print(network);
   }
 
   public void initBundles(TSNetwork network) {
@@ -381,7 +410,7 @@ public class Bundler {
     return theta;
   }
 
-  public void print() {
+  public void print(TSNetwork network) {
     /*logger.debug("-- PRINTING BUNDLES --");
     for(AnchorPoint pt : bundles_.keySet()) {
       logger.debug("Point "+pt.getID());
@@ -393,6 +422,14 @@ public class Bundler {
       }
     }
     logger.debug("-- END BUNDLES --");*/
+    
+    // print offsets only
+    for(Line line : network.getLines()) {
+      System.out.println("Line "+line.getName());
+      for(Corridor corr : line.getCorridors()) {
+        System.out.println(" corr "+corr.getID()+" offsets: "+line.getCorridorInfo(corr).offsetFrom_+" / "+line.getCorridorInfo(corr).offsetTo_);
+      }
+    }
   }
 
   
@@ -933,5 +970,11 @@ public class Bundler {
     if(theta < 0) theta += 360;
     if(theta >= 360) theta -= 360;
     return theta;
+  }
+
+  private void processCorridors(TSNetwork network) {
+    for(Corridor corr : network.getCorridors()) {
+      corr.calculateAverageOffset();
+    }
   }
 }

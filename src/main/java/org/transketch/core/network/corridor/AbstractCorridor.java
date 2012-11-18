@@ -53,6 +53,8 @@ public abstract class AbstractCorridor implements Drawable {
 
   protected Point2D.Double defaultElbow_;
   protected Arc2D.Double defaultArcFW_, defaultArcBW_;
+  
+  protected double avgOffset_;
 
   public abstract double x1();
   public abstract double y1();
@@ -160,148 +162,8 @@ public abstract class AbstractCorridor implements Drawable {
   }
 
   public Path2D getPath(int offsetFrom, int offsetTo, Line2D prevLine, Line2D nextLine, MapCoordinates coords, boolean reverse) {
-
     if(reverse) return getPathBW(offsetFrom, offsetTo, prevLine, nextLine, coords);
-    else return getPathFW(offsetFrom, offsetTo, prevLine, nextLine, coords);
-    
-    /*Path2D path = new Path2D.Double();
-    //boolean reverse = (fromPt != this.fPoint_);
-
-    Point2D fPoint = new Point2D.Double(x1(), y1());
-    Point2D tPoint = new Point2D.Double(x2(), y2());
-
-    // apply offsets, if applicable
-    if(offsetFrom != 0 || offsetTo != 0) {
-      applyOffsets(fPoint, tPoint, offsetFrom, offsetTo, coords);
-    } // end of apply offsets block
-
-    double x1 = fPoint.getX(), y1 = fPoint.getY();
-    double x2 = tPoint.getX(), y2 = tPoint.getY();
-
-    if(isStraight()) {
-
-      double tol = .0001;
-
-      Line2D thisLine = new Line2D.Double(x1, y1, x2, y2);
-      double thisTheta = FPUtil.getTheta(thisLine);
-      if(thisTheta >= Math.PI) thisTheta -= Math.PI;
-      //logger.debug("thisLine "+thisLine.getP1() +" to "+thisLine.getP2());
-
-      if(prevLine != null) {
-        //logger.debug(" prevLine "+prevLine.getP1() +" to "+prevLine.getP2());
-        double prevTheta = FPUtil.getTheta(prevLine);
-        if(prevTheta >= Math.PI) prevTheta -= Math.PI;
-        if(Math.abs(prevTheta-thisTheta) >= tol) {
-          Point2D isect = FPUtil.lineLineIntersection(prevLine, thisLine);
-          if(isect != null) {
-            //logger.debug(" prevLine isect "+isect);
-            if(reverse) {
-              x2 = isect.getX();
-              y2 = isect.getY();
-            }
-            else {
-              x1 = isect.getX();
-              y1 = isect.getY();
-            }
-          }
-        }
-      }
-
-      if(nextLine != null) {
-        //logger.debug(" nextLine "+nextLine.getP1() +" to "+nextLine.getP2());
-        
-        double nextTheta = FPUtil.getTheta(nextLine);
-        if(nextTheta >= Math.PI) nextTheta -= Math.PI;
-        if(Math.abs(nextTheta-thisTheta) >= tol) {
-
-          Point2D isect = FPUtil.lineLineIntersection(nextLine, thisLine);
-
-          if(isect != null) {
-            //logger.debug("  nextLine isect "+isect);
-            if(reverse) {
-              x1 = isect.getX();
-              y1 = isect.getY();
-            }
-            else {
-              x2 = isect.getX();
-              y2 = isect.getY();
-            }
-          }
-        }
-      }
-
-      if(reverse) {
-        //logger.debug("gP str rev");
-        path.moveTo(x2, y2);
-        path.lineTo(x1, y1);
-        //logger.debug("lineto " +x1+","+y1);
-      }
-
-      else {
-        //logger.debug("gP str fwd");
-        path.moveTo(x1, y1);
-        path.lineTo(x2, y2);
-      }
-
-
-      path.transform(coords.getScaleTransform());
-      path.transform(coords.getTranslateTransform());
-      return path;
-    } // end straight case
-
-    if(reverse) path.moveTo(x2, y2);
-    else path.moveTo(x1, y1);
-
-    if(offsetFrom == 0 && offsetTo == 0) {
-      if(!reverse) {
-        //path.lineTo(defaultArcFW_.getStartPoint().getX(), defaultArcFW_.getStartPoint().getY());
-        path.append(defaultArcFW_, true);
-        path.lineTo(x2, y2);
-      }
-      else {
-        //path.lineTo(defaultArcBW_.getStartPoint().getX(), defaultArcBW_.getStartPoint().getY());
-        path.append(defaultArcBW_, true);
-        path.lineTo(x1, y1);
-      }
-    }
-    else { // offsets do apply
-
-      Point2D.Double e = constructElbow(x1, y1, x2, y2);
-      double l = radiusW_ / Math.tan(thetaR_/2);
-      double rw = radiusW_;
-
-      double shortest = Math.min(FPUtil.magnitude(x1, y1, e.x, e.y), FPUtil.magnitude(x2, y2, e.x, e.y));
-      if( shortest < l) {
-        l = shortest;
-        rw = l * Math.tan(thetaR_/2);
-      }
-
-      //Line2D.Double v1 = FPUtil.createNormalizedVector(e, new Point2D.Double(x1, y1), l);
-      //Line2D.Double v2 = FPUtil.createNormalizedVector(e, new Point2D.Double(x2, y2), l);
-
-      if(!reverse) {
-        //path.lineTo(v1.x2, v1.y2);
-
-        Arc2D arc = constructArcFW(x1, y1, x2, y2, e, l, rw);
-        //path.lineTo(arc.getStartPoint().getX(), arc.getStartPoint().getY());
-        path.append(arc, true);
-        path.lineTo(x2, y2);
-      }
-      else {
-        //path.lineTo(v2.x2, v2.y2);
-
-        Arc2D arc = constructArcBW(x1, y1, x2, y2, e, l, rw);
-        path.append(arc, true);
-        path.lineTo(x1, y1);
-      }
-
-    }
-
-    // convert from world to screen coordinates:
-    path.transform(coords.getScaleTransform());
-    path.transform(coords.getTranslateTransform());
-
-    return path;*/
+    else return getPathFW(offsetFrom, offsetTo, prevLine, nextLine, coords);    
   }
 
   public List<CorridorComponent> getOffsetComponents(int offsetFrom, int offsetTo, MapCoordinates coords, boolean fw) {
@@ -334,18 +196,33 @@ public abstract class AbstractCorridor implements Drawable {
       comps.add(new SegmentComponent(fw ? defaultArcFW_.getEndPoint() : defaultArcBW_.getEndPoint(), fw ? tPoint : fPoint));
     }
     else { // bent, w/ offsets
-      Point2D.Double e = constructElbow(x1, y1, x2, y2);
-      double l = radiusW_ / Math.tan(thetaR_/2);
-      double rw = radiusW_;
-
+      
+      // start with the default arc
+      Arc2D defArc = fw ? defaultArcFW_ : defaultArcBW_;
+      
+      // construct offset elbow and determine orientation
+      Point2D.Double e = constructElbow(x1, y1, x2, y2);      
+      int ccw = Line2D.relativeCCW( x1, y1, e.x, e.y, x2, y2);
+      
+      // compute the radius (assuming corridor is unconstrained)
+      double combinedOffset = (offsetFrom+offsetTo)/2; 
+      double rw = radiusW_ - ccw*coords.dxToWorld(combinedOffset-this.avgOffset_);
+      
+      // adjust radius down if corridor is constrianed
+      double halfTheta = thetaR_/2;
+      double l = radiusW_ / Math.tan(halfTheta);
       double shortest = Math.min(FPUtil.magnitude(x1, y1, e.x, e.y), FPUtil.magnitude(x2, y2, e.x, e.y));
-      if( shortest < l) {
-        l = shortest;
-        rw = l * Math.tan(thetaR_/2);
-      }
-
-      Arc2D arc = fw ? constructArcFW(x1, y1, x2, y2, e, l, rw) : constructArcBW(x1, y1, x2, y2, e, l, rw);
-
+      if( shortest < l) rw = shortest * Math.tan(halfTheta);
+      
+      // compute the center of the arc 
+      double h = rw / Math.sin(halfTheta);
+      double hAngle = FPUtil.getTheta(x2-e.x, y2-e.y) - ccw*halfTheta;
+      double cx = e.x+ h * Math.cos(hAngle);
+      double cy = e.y+ h * Math.sin(hAngle);
+      
+      // construct the arc
+      Arc2D arc = new Arc2D.Double(cx-rw, cy-rw, rw*2, rw*2, defArc.getAngleStart(), defArc.getAngleExtent(), Arc2D.OPEN);
+      
       comps.add(new SegmentComponent(fw ? fPoint : tPoint, fw ? arc.getStartPoint() : arc.getStartPoint()));
       comps.add(new ArcComponent(arc));
       comps.add(new SegmentComponent(fw ? arc.getEndPoint() : arc.getEndPoint(), fw ? tPoint : fPoint));
@@ -437,7 +314,6 @@ public abstract class AbstractCorridor implements Drawable {
   }
 
   public Path2D getPathBW(int offsetFrom, int offsetTo, Line2D prevLine, Line2D nextLine, MapCoordinates coords) {
-
     double tol = .0001;
     Path2D path = new Path2D.Double();
 
@@ -506,6 +382,7 @@ public abstract class AbstractCorridor implements Drawable {
       }
 
       Arc2D arc = constructArcBW(x1, y1, x2, y2, e, l, rw);
+      System.out.println("append bw arc: "+arc.toString());
       path.append(arc, true);
       path.lineTo(x1, y1);
 
@@ -604,9 +481,7 @@ public abstract class AbstractCorridor implements Drawable {
       cx = fx + (Math.abs(e.x-fx)-l)*(tx-fx)/Math.abs(tx-fx);
       startAngle = 180 - 90 * (ty-fy)/Math.abs(ty-fy);
     }
-
     return new Arc2D.Double(cx-rw, cy-rw, rw*2, rw*2, startAngle, ccw*(180-Math.toDegrees(thetaR_)), Arc2D.OPEN);
-
   }
 
   public Arc2D.Double constructArcBW(double fx, double fy, double tx, double ty, Point2D.Double e, double l, double rw) {

@@ -667,8 +667,8 @@ public class Line implements Drawable, NamedItem {
 
   public class CorridorInfo {
 
-    int offsetFrom_, offsetTo_;
-    int openMonth_, openYear_;
+    public int offsetFrom_, offsetTo_;
+    public int openMonth_, openYear_;
 
     public CorridorInfo(int offsetFrom, int offsetTo, int openMonth, int openYear) {
       offsetFrom_ = offsetFrom;
