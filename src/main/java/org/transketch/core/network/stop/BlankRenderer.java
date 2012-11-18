@@ -34,26 +34,34 @@ import org.transketch.apps.desktop.TSCanvas;
  */
 public class BlankRenderer extends StopRenderer {
 
-  public BlankRenderer(Stop stop, BlankRendererTemplate template) {
-    super(stop, template);
+  public BlankRenderer() {
+    //super(stop, template);
+  }
+
+  public Type getType() {
+    return Type.BLANK;
   }
 
   @Override
-  public void drawStop(TSCanvas c) {
+  public void drawStop(Stop stop, TSCanvas c) {
   }
 
   @Override
-  public Point2D getLabelOrigin(TSCanvas c) {
-    return new Point2D.Double(c.getCoordinates().xToScreen(stop_.getWorldX()), c.getCoordinates().yToScreen(stop_.getWorldY()));
+  public Point2D getLabelOrigin(Stop stop, TSCanvas c) {
+    return new Point2D.Double(c.getCoordinates().xToScreen(stop.getWorldX()), c.getCoordinates().yToScreen(stop.getWorldY()));
   }
 
   @Override
-  public void drawHighlight(TSCanvas canvas, Color color) {
+  public void drawHighlight(Stop stop, TSCanvas canvas, Color color) {
   }
 
   @Override
-  public boolean containsPoint(TSCanvas c, double wx, double wy) {
+  public boolean containsPoint(Stop stop, TSCanvas c, double wx, double wy) {
     return false;
   }
-
+  
+  @Override
+  public StopRenderer getCopy() {
+    return new BlankRenderer();
+  }
 }

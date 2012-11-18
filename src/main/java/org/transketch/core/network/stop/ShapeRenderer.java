@@ -31,34 +31,29 @@ import java.util.Map;
  *
  * @author demory
  */
-public class FilledBorderedShapeRendererTemplate extends StopRendererTemplate {
+public abstract class ShapeRenderer extends StopRenderer {
 
   private IntegerProperty borderWeight_;
   private ColorProperty fillColor_, borderColor_;
 
-  public FilledBorderedShapeRendererTemplate() {
+  public ShapeRenderer() {
+    super();
     borderWeight_ = createIntegerProperty("bweight", "Border Weight", 2);
     fillColor_ = createColorProperty("fcolor", "Fill Color", Color.white);
     borderColor_ = createColorProperty("bcolor", "Border Color", Color.black);
   }
 
-  public FilledBorderedShapeRendererTemplate(FilledBorderedShapeRendererTemplate copy) {
+  public ShapeRenderer(ShapeRenderer copy) {
     borderWeight_ = createIntegerProperty(copy.borderWeight_.key_, copy.borderWeight_.name_, copy.borderWeight_.value_);
     fillColor_ = createColorProperty(copy.fillColor_.key_, copy.fillColor_.name_, copy.fillColor_.value_);
     borderColor_ = createColorProperty(copy.borderColor_.key_, copy.borderColor_.name_, copy.borderColor_.value_);
   }
 
-  FilledBorderedShapeRendererTemplate(Map<String, Object> keyValueMap_) {
+  ShapeRenderer(Map<String, Object> keyValueMap_) {
     borderWeight_ = createIntegerProperty("bweight", "Border Weight", (Integer) keyValueMap_.get("bweight"));
     fillColor_ = createColorProperty("fcolor", "Fill Color", (Color) keyValueMap_.get("fcolor"));
     borderColor_ = createColorProperty("bcolor", "Border Color", (Color) keyValueMap_.get("bcolor"));
   }
-
-  @Override
-  public Type getType() {
-    return Type.FILLEDBORDEREDSHAPE;
-  }
-
 
   public int getBorderWeight() {
     return borderWeight_.getValue();
@@ -72,7 +67,9 @@ public class FilledBorderedShapeRendererTemplate extends StopRendererTemplate {
     return fillColor_.getValue();
   }
 
-  public Object clone() {
-    return new FilledBorderedShapeRendererTemplate(this);
+  protected void copyProperties(ShapeRenderer source) {
+    borderWeight_ = createIntegerProperty(source.borderWeight_.key_, source.borderWeight_.name_, source.borderWeight_.value_);
+    fillColor_ = createColorProperty(source.fillColor_.key_, source.fillColor_.name_, source.fillColor_.value_);
+    borderColor_ = createColorProperty(source.borderColor_.key_, source.borderColor_.name_, source.borderColor_.value_);
   }
 }

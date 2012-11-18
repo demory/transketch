@@ -22,9 +22,7 @@ import org.transketch.apps.desktop.command.stopstyle.EditStopStyleCommand;
 import org.transketch.apps.desktop.gui.TranSketchGUI;
 import org.transketch.apps.desktop.gui.editor.EditStopStyleDialog;
 import org.transketch.core.NamedItemComparator;
-import org.transketch.core.network.stop.StopRendererTemplate;
 import org.transketch.core.network.stop.StopStyle;
-import org.transketch.core.network.stop.StopStyles;
 import org.transketch.util.gui.GUIFactory;
 
 /**
@@ -69,9 +67,9 @@ public class StopStylesFrame extends ListControlFrame<StopStyle> implements Acti
     Editor ed = gui_.getActiveDocumentFrame().getDocument().getEditor();
     EditStopStyleDialog dialog = new EditStopStyleDialog(null, selectedRow_.getItem());
     if(dialog.okPressed()) {
-      StopRendererTemplate template = dialog.getRendererTemplate();
+      //StopRendererTemplate template = dialog.getRendererTemplate();
       //template.print();
-      invoker_.doCommand(new EditStopStyleCommand(ed, selectedRow_.getItem(), dialog.getStyleName(), dialog.getRendererType(), template));
+      invoker_.doCommand(new EditStopStyleCommand(ed, selectedRow_.getItem(), dialog.getStyleName(), dialog.getRenderer()));
     }
   }
 

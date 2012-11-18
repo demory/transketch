@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.transketch.util.FPUtil;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -90,9 +92,15 @@ public class StopStyles {
             style.setName(name);
 
             String rendererTypeName = attributes.getNamedItem("renderertype").getNodeValue();
-            style.setRendererType(StopRenderer.Type.valueOf(rendererTypeName));
-
-            Map<String, Object> keyValueMap_ = new HashMap<String, Object>();
+            StopRenderer renderer = null;
+            
+            try {
+              renderer = (StopRenderer) StopRenderer.Type.valueOf(rendererTypeName).getRendererClass().newInstance();
+            } catch (InstantiationException ex) {
+              Logger.getLogger(StopStyles.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+              Logger.getLogger(StopStyles.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             NodeList propsNodes = stylesNodes.item(is).getChildNodes();
             for (int ip = 0; ip < propsNodes.getLength(); ip++) {
@@ -100,26 +108,17 @@ public class StopStyles {
                 NamedNodeMap propAttrs = propsNodes.item(ip).getAttributes();
                 String key = propAttrs.getNamedItem("key").getNodeValue();
                 Integer value = new Integer(propAttrs.getNamedItem("value").getNodeValue());
-                keyValueMap_.put(key, value);
+                renderer.setIntegerProperty(key, value);
               }
               if(propsNodes.item(ip).getNodeName().equals("colorprop")) {
                 NamedNodeMap propAttrs = propsNodes.item(ip).getAttributes();
                 String key = propAttrs.getNamedItem("key").getNodeValue();
                 Color value = new Color(Integer.parseInt(propAttrs.getNamedItem("value").getNodeValue()));
-                keyValueMap_.put(key, value);
+                renderer.setColorProperty(key, value);
               }
             }
 
-            String templateTypeName = attributes.getNamedItem("templatetype").getNodeValue();
-            switch(StopRendererTemplate.Type.valueOf(templateTypeName)) {
-              case BLANK:
-                style.setTemplate(new BlankRendererTemplate());
-                break;
-              case FILLEDBORDEREDSHAPE:
-                FilledBorderedShapeRendererTemplate template = new FilledBorderedShapeRendererTemplate(keyValueMap_);
-                style.setTemplate(template);
-                break;
-            }
+            style.setRenderer(renderer);
 
             styles_.put(id, style);
           }

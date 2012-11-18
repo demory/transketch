@@ -25,7 +25,6 @@
 package org.transketch.core.network.stop;
 
 import org.transketch.core.NamedItem;
-import org.transketch.core.network.stop.StopRenderer.Type;
 
 /**
  *
@@ -35,8 +34,8 @@ public class StopStyle implements NamedItem {
 
   private int id_;
   private String name_;
-  private StopRenderer.Type rendererType_;
-  private StopRendererTemplate template_;
+  
+  private StopRenderer renderer_;
 
   // any "preset" (i.e. system-defined) styles are declared here:
   public enum Preset {
@@ -48,8 +47,7 @@ public class StopStyle implements NamedItem {
 
   public StopStyle() {
     name_ = "Unnamed Stop Style";
-    rendererType_ = StopRenderer.Type.CIRCLE;
-    template_ = new FilledBorderedShapeRendererTemplate();
+    renderer_ = new CircleRenderer();
     id_ = -1;
   }
 
@@ -58,8 +56,7 @@ public class StopStyle implements NamedItem {
     id_ = -1;
     switch(preset) {
       case DEFAULT:
-        rendererType_ = StopRenderer.Type.CIRCLE;
-        template_ = new FilledBorderedShapeRendererTemplate();
+        renderer_ = new CircleRenderer();
         break;
     }
   }
@@ -80,27 +77,18 @@ public class StopStyle implements NamedItem {
     id_ = id;
   }
   
-  public StopRenderer.Type getRendererType() {
-    return rendererType_;
+  public StopRenderer getRenderer() {
+    return renderer_;
   }
 
-  public void setRendererType(Type type) {
-    rendererType_ = type;
-  }
-
-  public StopRendererTemplate getTemplate() {
-    return template_;
-  }
-
-  public void setTemplate(StopRendererTemplate template) {
-    template_ = template;
-    template_.print();
+  public void setRenderer(StopRenderer renderer) {
+    renderer_ = renderer;
   }
 
   public String getXML(String indent) {
     String xml = "";
-    xml += indent+"<style id=\""+id_+"\" name=\""+name_+"\" renderertype=\""+rendererType_+"\" templatetype=\""+template_.getType()+"\" >\n";
-    for(RendererProperty prop : template_.getProperties()) {
+    xml += indent+"<style id=\""+id_+"\" name=\""+name_+"\" renderertype=\""+renderer_.getType()+"\" >\n";
+    for(RendererProperty prop : renderer_.getProperties()) {
       xml += indent+"  "+prop.getXML();
     }
     xml += indent+"</style>\n";

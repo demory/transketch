@@ -29,7 +29,6 @@ import org.transketch.apps.desktop.TranSketch;
 import org.transketch.apps.desktop.command.EditorBasedCommand;
 import org.transketch.apps.desktop.command.TSAction;
 import org.transketch.core.network.stop.StopRenderer;
-import org.transketch.core.network.stop.StopRendererTemplate;
 import org.transketch.core.network.stop.StopStyle;
 
 /**
@@ -40,34 +39,37 @@ public class EditStopStyleCommand extends EditorBasedCommand implements TSAction
 
   private StopStyle style_;
   private String oldName_, newName_;
-  private StopRenderer.Type oldType_, newType_;
-  private StopRendererTemplate oldTemplate_, newTemplate_;
-
-  public EditStopStyleCommand(Editor ed, StopStyle style, String name, StopRenderer.Type type, StopRendererTemplate template) {
+  //private StopRenderer.Type oldType_, newType_;
+  //private StopRendererTemplate oldTemplate_, newTemplate_;
+  private StopRenderer oldRenderer_, newRenderer_;
+  
+  public EditStopStyleCommand(Editor ed, StopStyle style, String name, StopRenderer renderer) {
     super(ed);
     style_ = style;
     oldName_ = style.getName();
     newName_ = name;
-    oldType_ = style_.getRendererType();
+    /*oldType_ = style_.getRendererType();
     newType_ = type;
     oldTemplate_ = style_.getTemplate();
-    newTemplate_ = template;
+    newTemplate_ = template;*/
+    oldRenderer_ = style.getRenderer();
+    newRenderer_ = renderer;
   }
 
   public boolean doThis(TranSketch ts) {
     style_.setName(newName_);
-    style_.setRendererType(newType_);
-    style_.setTemplate(newTemplate_);
-    ed_.getDocument().getNetwork().updateStopRenderers();
+    style_.setRenderer(newRenderer_);
+    //style_.setTemplate(newTemplate_);
+    //ed_.getDocument().getNetwork().updateStopRenderers();
     ts.getGUI().getControlFrameManager().getStopStylesFrame().updateRows(ed_.getDocument().getStopStyles().getList());
     return true;
   }
 
   public boolean undoThis(TranSketch ts) {
     style_.setName(oldName_);
-    style_.setRendererType(oldType_);
-    style_.setTemplate(oldTemplate_);
-    ed_.getDocument().getNetwork().updateStopRenderers();
+    style_.setRenderer(oldRenderer_);
+    //style_.setTemplate(oldTemplate_);
+    //ed_.getDocument().getNetwork().updateStopRenderers();
     ts.getGUI().getControlFrameManager().getStopStylesFrame().updateRows(ed_.getDocument().getStopStyles().getList());
     return true;
   }

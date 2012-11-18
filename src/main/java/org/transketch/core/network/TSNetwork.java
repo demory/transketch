@@ -357,10 +357,10 @@ public class TSNetwork {
     stops_.remove(stop.getID());
   }
 
-  public void updateStopRenderers() {
+  /*public void updateStopRenderers() {
     for(Stop stop : stops_.values())
       stop.updateRenderer();
-  }
+  }*/
 
 
   // FILE I/O METHODS

@@ -27,7 +27,11 @@ package org.transketch.core.network.stop;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
+import java.util.HashMap;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.core.network.Bundler.Bundle;
 
@@ -35,75 +39,97 @@ import org.transketch.core.network.Bundler.Bundle;
  *
  * @author demory
  */
-public class CircleRenderer extends StopRenderer<FilledBorderedShapeRendererTemplate> {
+public class CircleRenderer extends ShapeRenderer {
 
-  private double radius_ = 0;
+  //private double defaultRadius_ = 0;
 
-  public CircleRenderer(Stop stop, FilledBorderedShapeRendererTemplate template) {
-    super(stop, template);
+  public CircleRenderer() {
+    super();
   }
 
+  @Override
+  public Type getType() {
+    return Type.CIRCLE;
+  }
+  
+  /*
   @Override
   public void initialize() {
     double width = 0;
-    for(Bundle b : ((AnchorBasedStop) stop_).getAnchorPoint().getBundles().values()) {
+    for(Bundle b : ((AnchorBasedStop) stop).getAnchorPoint().getBundles().values()) {
       width = Math.max(width, b.getWidth());
     }
 
-    radius_ = width/2;
+    defaultRadius_ = width/2;
+  }*/
+  
+  public double getRadius(Stop stop) {
+    double width = 0;
+    for(Bundle b : ((AnchorBasedStop) stop).getAnchorPoint().getBundles().values()) {
+      width = Math.max(width, b.getWidth());
+    }
+
+    return width/2;
   }
 
   @Override
-  public void drawStop(TSCanvas canvas) {
+  public void drawStop(Stop stop, TSCanvas canvas) {
     Graphics2D g2d = canvas.getGraphics2D();
 
-    double rs = canvas.getCoordinates().dxToWorld(radius_);
-    Ellipse2D e = new Ellipse2D.Double(stop_.getWorldX()-rs, stop_.getWorldY()-rs, rs*2, rs*2);
+    double rs = canvas.getCoordinates().dxToWorld(getRadius(stop));
+    Ellipse2D e = new Ellipse2D.Double(stop.getWorldX()-rs, stop.getWorldY()-rs, rs*2, rs*2);
     Path2D p = new Path2D.Double(e);
     p.transform(canvas.getCoordinates().getScaleTransform());
     p.transform(canvas.getCoordinates().getTranslateTransform());
     
-    p.transform(AffineTransform.getTranslateInstance(stop_.getScreenOffset().getX(), -stop_.getScreenOffset().getY()));
+    p.transform(AffineTransform.getTranslateInstance(stop.getScreenOffset().getX(), -stop.getScreenOffset().getY()));
     
-    g2d.setColor(template_.getFillColor());
+    g2d.setColor(getFillColor());
     g2d.fill(p);
-    g2d.setColor(template_.getBorderColor());
-    g2d.setStroke(new BasicStroke(template_.getBorderWeight()));
+    g2d.setColor(getBorderColor());
+    g2d.setStroke(new BasicStroke(getBorderWeight()));
     g2d.draw(p);
 
   }
 
   @Override
-  public Point2D getLabelOrigin(TSCanvas c) {
+  public Point2D getLabelOrigin(Stop stop, TSCanvas c) {
 
-    double r2 = radius_ + 4; // default buffer
+    double r2 = getRadius(stop) + 4; // default buffer
 
-    return new Point2D.Double(stop_.getScreenX(c.getCoordinates()) + stop_.getScreenOffset().getX() + r2*Math.cos(-stop_.labelAngleR_),
-                              stop_.getScreenY(c.getCoordinates()) - stop_.getScreenOffset().getY() + r2*Math.sin(-stop_.labelAngleR_));
+    return new Point2D.Double(stop.getScreenX(c.getCoordinates()) + stop.getScreenOffset().getX() + r2*Math.cos(-stop.labelAngleR_),
+                              stop.getScreenY(c.getCoordinates()) - stop.getScreenOffset().getY() + r2*Math.sin(-stop.labelAngleR_));
   }
 
   @Override
-  public void drawHighlight(TSCanvas canvas, Color color) {
+  public void drawHighlight(Stop stop, TSCanvas canvas, Color color) {
     Graphics2D g2d = canvas.getGraphics2D();
     
-    double rs = canvas.getCoordinates().dxToWorld(radius_ + 5);
-    Ellipse2D e = new Ellipse2D.Double(stop_.getWorldX() - rs, stop_.getWorldY() - rs, rs * 2, rs * 2);
+    double rs = canvas.getCoordinates().dxToWorld(getRadius(stop) + 5);
+    Ellipse2D e = new Ellipse2D.Double(stop.getWorldX() - rs, stop.getWorldY() - rs, rs * 2, rs * 2);
     Path2D p = new Path2D.Double(e);
     p.transform(canvas.getCoordinates().getScaleTransform());
     p.transform(canvas.getCoordinates().getTranslateTransform());
 
-    p.transform(AffineTransform.getTranslateInstance(stop_.getScreenOffset().getX(), -stop_.getScreenOffset().getY()));
+    p.transform(AffineTransform.getTranslateInstance(stop.getScreenOffset().getX(), -stop.getScreenOffset().getY()));
 
     g2d.setColor(color);
     g2d.fill(p);
   }
 
-  public boolean containsPoint(TSCanvas c, double wx, double wy) {
+  @Override
+  public boolean containsPoint(Stop stop, TSCanvas c, double wx, double wy) {
     Point2D pt = new Point2D.Double(c.getCoordinates().xToScreen(wx), c.getCoordinates().yToScreen(wy));
-    return (pt.distance(stop_.getScreenX(c.getCoordinates()) + stop_.getScreenOffset().getX(),
-                        stop_.getScreenY(c.getCoordinates()) - stop_.getScreenOffset().getY()) < radius_);
+    return (pt.distance(stop.getScreenX(c.getCoordinates()) + stop.getScreenOffset().getX(),
+                        stop.getScreenY(c.getCoordinates()) - stop.getScreenOffset().getY()) < getRadius(stop));
   }
 
+  @Override
+  public StopRenderer getCopy() {
+    CircleRenderer clone = new CircleRenderer();
+    copyProperties(clone);
+    return clone;
+  }  
 }
 
 

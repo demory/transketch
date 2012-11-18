@@ -46,7 +46,7 @@ import org.transketch.util.viewport.MapCoordinates;
 public abstract class Stop implements Drawable {
   private final static Logger logger = Logger.getLogger(Stop.class);
 
-  // core fields (i.e. stored in the .fpc file)
+  // core fields (i.e. to be stored in the .tsk file)
 
   protected int id_;
 
@@ -55,14 +55,13 @@ public abstract class Stop implements Drawable {
   protected StopStyle stopStyle_;
 
   protected LabelStyle labelStyle_;
+  
   protected boolean showLabel_ = true;
 
   protected double labelAngleR_ = 0;
 
 
   // other fields
-
-  protected StopRenderer renderer_; // created dynamically based on settings in StopStyle
 
   protected Map<Line, LineStopInfo> lineInfo_;
 
@@ -83,8 +82,6 @@ public abstract class Stop implements Drawable {
     name_ = name;
     stopStyle_ = new StopStyle(StopStyle.Preset.DEFAULT);
     labelStyle_ = new LabelStyle();
-
-    updateRenderer();
   }
 
   public void applyStopProperties(Map<String, String> properties) {
@@ -120,11 +117,6 @@ public abstract class Stop implements Drawable {
 
   public void setStyle(StopStyle style) {
     stopStyle_ = style;
-    updateRenderer();
-  }
-
-  public StopRenderer getRenderer() {
-    return renderer_;
   }
   
   public LabelStyle getLabelStyle() {
@@ -180,30 +172,19 @@ public abstract class Stop implements Drawable {
 
   public abstract String getTypePropertiesXML(String indent);
 
-  public void updateRenderer() {
-
-    try {
-      //logger.debug("type="+stopStyle_.getRendererType());
-      //logger.debug("style template="+stopStyle_.getTemplate());
-      Class cl = stopStyle_.getRendererType().classObj_;
-      Constructor co = cl.getConstructor(new Class[] {Stop.class, stopStyle_.getRendererType().templateClassObj_ } );
-      renderer_ = (StopRenderer) co.newInstance(new Object[] { this, stopStyle_.getTemplate() } );
-    } catch (Exception ex) {
-      logger.error("error updating stop renderer", ex);
-    }
-  }
-
   @Override
   public void draw(TSCanvas c) {
-    renderer_.initialize();
-    renderer_.drawStop(c);
-    if(showLabel_) renderer_.drawLabel(c);
+    stopStyle_.getRenderer().drawStop(this, c);
+    if(showLabel_) stopStyle_.getRenderer().drawLabel(this, c);
   }
 
   @Override
   public void drawHighlight(TSCanvas canvas, Color color) {
-    renderer_.initialize();
-    renderer_.drawHighlight(canvas, color);
-  }
+    stopStyle_.getRenderer().drawHighlight(this, canvas, color);
 
+  }
+  
+  public boolean containsPoint(TSCanvas c, double wx, double wy) {
+    return stopStyle_.getRenderer().containsPoint(this, c, wx, wy);
+  }
 }

@@ -161,7 +161,7 @@ public class Editor {
     // check stops/stations
     if(eligibleTypes.contains(Drawable.Type.STOP) && getBoolProperty(Property.SHOW_STOPS)) {
       for(Stop stop : net.getStops()) {
-        if(stop.getRenderer().containsPoint(pane_.getCanvas(), wx, wy)) {
+        if(stop.containsPoint(pane_.getCanvas(), wx, wy)) {
           return stop;
         }
       }

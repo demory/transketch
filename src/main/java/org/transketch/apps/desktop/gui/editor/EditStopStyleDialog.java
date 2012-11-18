@@ -28,23 +28,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Constructor;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import java.util.Iterator;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import org.apache.log4j.Logger;
 import org.transketch.core.network.stop.RendererProperty;
-import org.transketch.core.network.stop.Stop;
 import org.transketch.core.network.stop.StopRenderer;
-import org.transketch.core.network.stop.StopRendererTemplate;
 import org.transketch.core.network.stop.StopStyle;
 import org.transketch.util.gui.GUIFactory;
 
@@ -69,17 +59,17 @@ public class EditStopStyleDialog extends JDialog implements ActionListener {
   public EditStopStyleDialog(JFrame parent, StopStyle style) {
     super(parent, "Edit Style", true);
 
-    style_ = style;
+    renderer_ = style.getRenderer().getCopy();
     
     // init renderer
-    try {
+    /*try {
       //logger.debug("class="+stopStyle_.getRendererType().className_);
       Class cl = style_.getRendererType().getRendererClass();
       Constructor co = cl.getConstructor(new Class[] {Stop.class, style.getRendererType().getTemplateClass() } );
       renderer_ = (StopRenderer) co.newInstance(new Object[] { null, style_.getTemplate().clone() } );
     } catch (Exception ex) {
       logger.error("error initializing renderer", ex);
-    }
+    }*/
 
     JPanel previewPanel = new JPanel();
     previewPanel.setBorder(new TitledBorder("Preview"));
@@ -88,7 +78,7 @@ public class EditStopStyleDialog extends JDialog implements ActionListener {
     rendererCB_ = new JComboBox();
     int toSelect = 0, i = 0;
     for(StopRenderer.Type rendererType: StopRenderer.Type.values()) {
-      if(style.getRendererType() == rendererType) toSelect = i;
+      if(style.getRenderer().getType() == rendererType) toSelect = i;
       rendererCB_.addItem(rendererType);
       i++;
     }
@@ -168,21 +158,32 @@ public class EditStopStyleDialog extends JDialog implements ActionListener {
     return nameField_.getText();
   }
 
-  public StopRenderer.Type getRendererType() {
+  /*public StopRenderer.Type getRendererType() {
     return (StopRenderer.Type) rendererCB_.getSelectedItem();
+  }*/
+  
+  public StopRenderer getRenderer() {
+    return renderer_;
   }
   
-  public StopRendererTemplate getRendererTemplate() {
+  /*public StopRendererTemplate getRendererTemplate() {
     return renderer_.getTemplate();
-  }
+  }*/
 
   private void rendererTypeSelected() {
     propsList_.removeAll();
-    //logger.debug("selected: "+rendererCB_.getSelectedItem());
+    logger.debug("selected: "+rendererCB_.getSelectedItem());
     
     StopRenderer.Type type = (StopRenderer.Type) rendererCB_.getSelectedItem();
+    try {
+      renderer_ = (StopRenderer) type.getRendererClass().newInstance();
+    } catch (InstantiationException ex) {
+      logger.debug(ex.getStackTrace());
+    } catch (IllegalAccessException ex) {
+      logger.debug(ex.getStackTrace());
+    }
 
-    StopRenderer renderer = null;
+    /*StopRenderer renderer = null;
 
     try {
       //logger.debug("class="+stopStyle_.getRendererType().className_);
@@ -191,14 +192,14 @@ public class EditStopStyleDialog extends JDialog implements ActionListener {
       renderer_ = (StopRenderer) co.newInstance(new Object[] { null, type.getTemplateClass().newInstance() } );
     } catch (Exception ex) {
       logger.error("error initializing renderer", ex);
-    }
+    }*/
 
     showRendererProperties();
   }
 
   public void showRendererProperties() {
-
-    for(RendererProperty prop : renderer_.getTemplate().getProperties()) {
+    for(Iterator<RendererProperty> it = renderer_.getProperties().iterator(); it.hasNext();) {
+      RendererProperty prop = it.next();
       JPanel row = GUIFactory.newRowPanel();
       row.setMaximumSize(new Dimension(200, 25));
       row.add(new JLabel(prop.getName()));

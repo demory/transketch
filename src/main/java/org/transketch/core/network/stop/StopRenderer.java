@@ -28,101 +28,109 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
+import java.util.*;
 import org.transketch.apps.desktop.TSCanvas;
 
 /**
  *
  * @author demory
  */
-public abstract class StopRenderer<T extends StopRendererTemplate> {
+public abstract class StopRenderer {
 
-  protected Stop stop_;
-
-  protected T template_;
-  //protected Class<T> tClass_;
+  // renderer-specific properties
+  protected Map<String, RendererProperty> properties_ = new HashMap<String, RendererProperty>();
 
   public enum Type {
-    BLANK(BlankRenderer.class, BlankRendererTemplate.class),
-    CIRCLE(CircleRenderer.class, FilledBorderedShapeRendererTemplate.class),
-    ROUNDED(RoundedRectRenderer.class, FilledBorderedShapeRendererTemplate.class);
+    BLANK(BlankRenderer.class),
+    CIRCLE(CircleRenderer.class),
+    FIXED_CIRCLE(FixedCircleRenderer.class),
+    ROUNDED(RoundedRectRenderer.class);
 
-    Class classObj_, templateClassObj_;
+    Class classObj_;
 
-    Type(Class classObj, Class tClassObj) {
+    Type(Class classObj) {
       classObj_ = classObj;
-      templateClassObj_ = tClassObj;
     }
 
     public Class getRendererClass() {
       return classObj_;
     }
-
-    public Class getTemplateClass() {
-      return templateClassObj_;
-    }
   }
 
 
-  public StopRenderer(Stop stop, T template) { //, Class<T> tClass) {
-    stop_ = stop;
-    template_ = template;
-    //tClass_ = tClass;
+  public StopRenderer() {
   }
 
-  public void initialize() { }
+  public abstract Type getType();
+  
+  //public void rebundled(Stop stop) { }
 
-  public T getTemplate() {
-    return template_;
+  public Collection<RendererProperty> getProperties() {
+    return properties_.values();
+  }
+  
+  public void addProperty(RendererProperty prop) {
+    properties_.put(prop.getKey(), prop);    
+  }
+  
+  protected IntegerProperty createIntegerProperty(String key, String name, int defaultVal) {
+    IntegerProperty prop = new IntegerProperty(key, name, defaultVal);
+    addProperty(prop);
+    return prop;
   }
 
-  public abstract void drawStop(TSCanvas c);
+  protected void setIntegerProperty(String key, int val) {
+    ((IntegerProperty) properties_.get(key)).setValue(val);
+  }
 
-  public void drawLabel(TSCanvas c) {
+  protected ColorProperty createColorProperty(String key, String name, Color defaultVal) {
+    ColorProperty prop = new ColorProperty(key, name, defaultVal);
+    addProperty(prop);
+    return prop;
+  }  
+  
+  protected void setColorProperty(String key, Color val) {
+    ((ColorProperty) properties_.get(key)).setValue(val);
+  }
+  
+  public abstract void drawStop(Stop stop, TSCanvas c);
+
+  public void drawLabel(Stop stop, TSCanvas c) {
     Graphics2D g2d = c.getGraphics2D();
-    g2d.setColor(stop_.getLabelStyle().getColor());
-    g2d.setFont(stop_.getLabelStyle().getFont());
+    g2d.setColor(stop.getLabelStyle().getColor());
+    g2d.setFont(stop.getLabelStyle().getFont());
     FontMetrics fm = g2d.getFontMetrics();
-    double textWidth = fm.stringWidth(stop_.getName());
+    double textWidth = fm.stringWidth(stop.getName());
 
-    Point2D origin = getLabelOrigin(c);
+    Point2D origin = getLabelOrigin(stop, c);
 
-    double drawAngle = stop_.labelAngleR_;
+    double drawAngle = stop.labelAngleR_;
 
-    if(stop_.labelAngleR_ > Math.PI/2 && stop_.labelAngleR_ < 1.5*Math.PI) {
+    if(stop.labelAngleR_ > Math.PI/2 && stop.labelAngleR_ < 1.5*Math.PI) {
       drawAngle -= Math.PI;
     }
 
 
     g2d.rotate(-drawAngle, origin.getX(), origin.getY());
-    if(stop_.labelAngleR_ > Math.PI/2 && stop_.labelAngleR_ < 1.5*Math.PI) {
+    if(stop.labelAngleR_ > Math.PI/2 && stop.labelAngleR_ < 1.5*Math.PI) {
       g2d.translate(-textWidth, 0);
     }
     double x = origin.getX();
-    double y = (origin.getY()+stop_.getLabelStyle().getFont().getSize()*.375);
-    g2d.drawString(stop_.getName(), (int) x, (int) y);
+    double y = (origin.getY()+stop.getLabelStyle().getFont().getSize()*.375);
+    g2d.drawString(stop.getName(), (int) x, (int) y);
 
-    if(stop_.labelAngleR_ > Math.PI/2 && stop_.labelAngleR_ < 1.5*Math.PI) {
+    if(stop.labelAngleR_ > Math.PI/2 && stop.labelAngleR_ < 1.5*Math.PI) {
       g2d.translate(textWidth, 0);
     }
     g2d.rotate(drawAngle, origin.getX(), origin.getY());
 
   }
 
-  /*public T getDefaultTemplate() {
-    try {
-      return tClass_.newInstance();
-    } catch (InstantiationException ex) {
-      Logger.getLogger(StopRenderer2.class.getName()).log(Level.SEVERE, null, ex);
-    } catch (IllegalAccessException ex) {
-      Logger.getLogger(StopRenderer2.class.getName()).log(Level.SEVERE, null, ex);
-    }
-    return null;
-  }*/
+  public abstract Point2D getLabelOrigin(Stop stop, TSCanvas c);
 
-  public abstract Point2D getLabelOrigin(TSCanvas c);
+  public abstract void drawHighlight(Stop stop, TSCanvas canvas, Color color);
 
-  public abstract void drawHighlight(TSCanvas canvas, Color color);
-
-  public abstract boolean containsPoint(TSCanvas c, double wx, double wy);
-  
+  public abstract boolean containsPoint(Stop stop, TSCanvas c, double wx, double wy);
+ 
+  public abstract StopRenderer getCopy();
 }

@@ -41,6 +41,10 @@ public abstract class RendererProperty<V> {
     value_ = defaultVal;
   }
 
+  public String getKey() {
+    return key_;
+  }
+
   public String getName() {
     return name_;
   }
