@@ -69,13 +69,7 @@ public class PreviewCorridor extends AbstractCorridor {
 
   @Override
   public void draw(TSCanvas canvas) {
-    draw(canvas, 0, 0, new LineStyleLayer(2, color_, new float[] { 2, 2 } ));
-    /*Path2D path = getPath(0, 0, canvas.getCoordinates(), reversed_);
-    Graphics2D g2d = canvas.getGraphics2D();
-    g2d.setColor(color_);
-    g2d.setStroke(new SubStyle(2, color_, new float[] { 2, 2 } ).getStroke());
-    g2d.draw(path);*/
-
+    draw(canvas, new LineStyleLayer(2, color_, new float[] { 2, 2 } ));
   }
 
   public void flip() {

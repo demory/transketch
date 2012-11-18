@@ -26,17 +26,12 @@ package org.transketch.core.network.corridor;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.transketch.apps.desktop.TSCanvas;
 import org.transketch.apps.desktop.gui.editor.map.Drawable;
-import org.transketch.core.network.Bundler;
 import org.transketch.core.network.LineStyleLayer;
 import org.transketch.util.FPUtil;
 import org.transketch.util.viewport.MapCoordinates;
@@ -113,31 +108,25 @@ public abstract class AbstractCorridor implements Drawable {
     return new Line2D.Double(xEnd, yEnd, xElb, yElb);
   }
 
-
-  /*public Line2D getToTangent() {
-    if(defaultElbow_ == null) return new Line2D.Double(x2(), y2(), x1(), y1());
-    return new Line2D.Double(x2(), y2(), defaultElbow_.x, defaultElbow_.y);
-  }*/
-
+  @Override
   public void draw(TSCanvas canvas) {
-    draw(canvas, 0, 0, new LineStyleLayer(2, Color.gray));
-    //System.out.println("draw corr "+((Corridor) this).getID());
+    draw(canvas.getGraphics2D(), canvas.getCoordinates(), new LineStyleLayer(2, Color.gray));
   }
 
-  public void draw(TSCanvas canvas, int offsetFrom, int offsetTo, LineStyleLayer sstyle) { //int width, int offsetFrom, int offsetTo, Color color) {
-    draw(canvas.getGraphics2D(), canvas.getCoordinates(), offsetFrom, offsetTo, sstyle); //2, color);
+  public void draw(TSCanvas canvas, LineStyleLayer sstyle) {
+    draw(canvas.getGraphics2D(), canvas.getCoordinates(), sstyle);
   }
 
-  public void draw(Graphics2D g2d, MapCoordinates coords, int offsetFrom, int offsetTo, LineStyleLayer sstyle) {
-    Path2D path = getPath(offsetFrom, offsetTo, null, null, coords, false);
+  public void draw(Graphics2D g2d, MapCoordinates coords, LineStyleLayer sstyle) {
+    Path2D path = getPath(coords, false);
     g2d.setColor(sstyle.getColor());
     g2d.setStroke(sstyle.getStroke());
     g2d.draw(path);
-    //if(((Corridor) this).getID()==13) System.out.println("draw corr 13 - "+path.getCurrentPoint());
   }
 
+  @Override
   public void drawHighlight(TSCanvas canvas, Color color) {
-    draw(canvas, 0, 0, new LineStyleLayer(6, color));
+    draw(canvas, new LineStyleLayer(6, color));
   }
 
   public void updateGeometry() {
@@ -161,11 +150,51 @@ public abstract class AbstractCorridor implements Drawable {
     defaultArcBW_ = constructArcBW(x1(), y1(), x2(), y2(), defaultElbow_, l, rw);
   }
 
-  public Path2D getPath(int offsetFrom, int offsetTo, Line2D prevLine, Line2D nextLine, MapCoordinates coords, boolean reverse) {
-    if(reverse) return getPathBW(offsetFrom, offsetTo, prevLine, nextLine, coords);
-    else return getPathFW(offsetFrom, offsetTo, prevLine, nextLine, coords);    
+  public Path2D getPath(MapCoordinates coords, boolean reverse) {
+    if(reverse) return getPathBW(coords);
+    else return getPathFW(coords);    
+  }
+  
+  public Path2D getPathFW(MapCoordinates coords) {
+
+    Path2D path = new Path2D.Double();
+
+    path.moveTo(x1(), y1());
+    if(isStraight()) {
+      path.lineTo(x2(), y2());
+    }
+    else {
+      path.append(defaultArcFW_, true);
+      path.lineTo(x2(), y2());
+    }
+    
+    // convert from world to screen coordinates:
+    path.transform(coords.getScaleTransform());
+    path.transform(coords.getTranslateTransform());
+
+    return path;
   }
 
+  public Path2D getPathBW(MapCoordinates coords) {
+
+    Path2D path = new Path2D.Double();
+
+    path.moveTo(x2(), y2());
+    if(isStraight()) {
+      path.lineTo(x1(), y1());
+    }
+    else {
+      path.append(defaultArcBW_, true);
+      path.lineTo(x1(), y1());
+    }
+
+    // convert from world to screen coordinates:
+    path.transform(coords.getScaleTransform());
+    path.transform(coords.getTranslateTransform());
+
+    return path;
+  }
+  
   public List<CorridorComponent> getOffsetComponents(int offsetFrom, int offsetTo, MapCoordinates coords, boolean fw) {
 
     List<CorridorComponent> comps = new LinkedList<CorridorComponent>();
@@ -229,170 +258,6 @@ public abstract class AbstractCorridor implements Drawable {
     }
 
     return comps;
-  }
-
-  public Path2D getPathFW(int offsetFrom, int offsetTo, Line2D prevLine, Line2D nextLine, MapCoordinates coords) {
-
-    double tol = .0001;
-    Path2D path = new Path2D.Double();
-
-    Point2D fPoint = new Point2D.Double(x1(), y1()), tPoint = new Point2D.Double(x2(), y2());
-
-    // apply offsets, if applicable
-    if(offsetFrom != 0 || offsetTo != 0)
-      applyOffsets(fPoint, tPoint, offsetFrom, offsetTo, coords);
-
-    double x1 = fPoint.getX(), y1 = fPoint.getY();
-    double x2 = tPoint.getX(), y2 = tPoint.getY();
-
-    if(isStraight()) {
-
-      Line2D thisLine = new Line2D.Double(x1, y1, x2, y2);
-      double thisTheta = FPUtil.getTheta(thisLine);
-      if(thisTheta >= Math.PI) thisTheta -= Math.PI;
-
-      if(prevLine != null) {
-        double prevTheta = FPUtil.getTheta(prevLine);
-        if(prevTheta >= Math.PI) prevTheta -= Math.PI;
-        if(Math.abs(prevTheta-thisTheta) >= tol) {
-          Point2D isect = FPUtil.lineLineIntersection(prevLine, thisLine);
-          if(isect != null) {
-            x1 = isect.getX();
-            y1 = isect.getY();
-          }
-        }
-      }
-
-      if(nextLine != null) {
-        double nextTheta = FPUtil.getTheta(nextLine);
-        if(nextTheta >= Math.PI) nextTheta -= Math.PI;
-        if(Math.abs(nextTheta-thisTheta) >= tol) {
-          Point2D isect = FPUtil.lineLineIntersection(nextLine, thisLine);
-          if(isect != null) {
-            x2 = isect.getX();
-            y2 = isect.getY();
-          }
-        }
-      }
-
-      path.moveTo(x1, y1);
-      path.lineTo(x2, y2);
-
-      path.transform(coords.getScaleTransform());
-      path.transform(coords.getTranslateTransform());
-      return path;
-    } // end straight case
-
-    else path.moveTo(x1, y1);
-
-    if(offsetFrom == 0 && offsetTo == 0) {
-      path.append(defaultArcFW_, true);
-      path.lineTo(x2, y2);
-    }
-    else { // offsets do apply
-
-      Point2D.Double e = constructElbow(x1, y1, x2, y2);
-      double l = radiusW_ / Math.tan(thetaR_/2);
-      double rw = radiusW_;
-
-      double shortest = Math.min(FPUtil.magnitude(x1, y1, e.x, e.y), FPUtil.magnitude(x2, y2, e.x, e.y));
-      if( shortest < l) {
-        l = shortest;
-        rw = l * Math.tan(thetaR_/2);
-      }
-
-      Arc2D arc = constructArcFW(x1, y1, x2, y2, e, l, rw);
-      path.append(arc, true);
-      path.lineTo(x2, y2);
-    }
-
-    // convert from world to screen coordinates:
-    path.transform(coords.getScaleTransform());
-    path.transform(coords.getTranslateTransform());
-
-    return path;
-  }
-
-  public Path2D getPathBW(int offsetFrom, int offsetTo, Line2D prevLine, Line2D nextLine, MapCoordinates coords) {
-    double tol = .0001;
-    Path2D path = new Path2D.Double();
-
-    Point2D fPoint = new Point2D.Double(x1(), y1()), tPoint = new Point2D.Double(x2(), y2());
-
-    // apply offsets, if applicable
-    if(offsetFrom != 0 || offsetTo != 0)
-      applyOffsets(fPoint, tPoint, offsetFrom, offsetTo, coords);
-
-    double x1 = fPoint.getX(), y1 = fPoint.getY();
-    double x2 = tPoint.getX(), y2 = tPoint.getY();
-
-    if(isStraight()) {
-
-      Line2D thisLine = new Line2D.Double(x1, y1, x2, y2);
-      double thisTheta = FPUtil.getTheta(thisLine);
-      if(thisTheta >= Math.PI) thisTheta -= Math.PI;
-
-      if(prevLine != null) {
-        double prevTheta = FPUtil.getTheta(prevLine);
-        if(prevTheta >= Math.PI) prevTheta -= Math.PI;
-        if(Math.abs(prevTheta-thisTheta) >= tol) {
-          Point2D isect = FPUtil.lineLineIntersection(prevLine, thisLine);
-          if(isect != null) {
-            x2 = isect.getX();
-            y2 = isect.getY();
-          }
-        }
-      }
-
-      if(nextLine != null) {
-        double nextTheta = FPUtil.getTheta(nextLine);
-        if(nextTheta >= Math.PI) nextTheta -= Math.PI;
-        if(Math.abs(nextTheta-thisTheta) >= tol) {
-          Point2D isect = FPUtil.lineLineIntersection(nextLine, thisLine);
-          if(isect != null) {
-            x1 = isect.getX();
-            y1 = isect.getY();
-          }
-        }
-      }
-
-      path.moveTo(x2, y2);
-      path.lineTo(x1, y1);
-      path.transform(coords.getScaleTransform());
-      path.transform(coords.getTranslateTransform());
-      return path;
-    } // end straight case
-
-    path.moveTo(x2, y2);
-
-    if(offsetFrom == 0 && offsetTo == 0) {
-      path.append(defaultArcBW_, true);
-      path.lineTo(x1, y1);
-    }
-    else { // offsets do apply
-
-      Point2D.Double e = constructElbow(x1, y1, x2, y2);
-      double l = radiusW_ / Math.tan(thetaR_/2);
-      double rw = radiusW_;
-
-      double shortest = Math.min(FPUtil.magnitude(x1, y1, e.x, e.y), FPUtil.magnitude(x2, y2, e.x, e.y));
-      if( shortest < l) {
-        l = shortest;
-        rw = l * Math.tan(thetaR_/2);
-      }
-
-      Arc2D arc = constructArcBW(x1, y1, x2, y2, e, l, rw);
-      System.out.println("append bw arc: "+arc.toString());
-      path.append(arc, true);
-      path.lineTo(x1, y1);
-
-    }
-
-    // convert from world to screen coordinates:
-    path.transform(coords.getScaleTransform());
-    path.transform(coords.getTranslateTransform());
-
-    return path;
   }
 
   public void applyOffsets(Point2D fPoint, Point2D tPoint, double offsetFrom, double offsetTo, MapCoordinates coords) {

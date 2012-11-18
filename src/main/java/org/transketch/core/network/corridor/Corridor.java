@@ -207,10 +207,6 @@ public class Corridor extends AbstractCorridor {
     return width;
   }
   
-  public Path2D getPath(AnchorPoint fromPt, int offsetFrom, int offsetTo, Line2D prev, Line2D next, MapCoordinates coords) {
-    return getPath(offsetFrom, offsetTo, prev, next, coords, (fromPt != this.fPoint_));
-  }
-
   public String getXML() {
     return "<corridor id=\""+id_+"\" fpoint=\""+fPoint_.getID()+"\" tpoint=\""+tPoint_.getID()+"\" theta=\""+thetaR_+"\" />\n";
   }
